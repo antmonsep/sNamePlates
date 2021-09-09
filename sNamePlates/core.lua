@@ -162,6 +162,23 @@ local function sNamePlates_IsValidFrame(frame)
 	return overlayRegion and overlayRegion:GetObjectType() == "Texture" and overlayRegion:GetTexture() == [[Interface\Tooltips\Nameplate-Border]]
 end
 
+local function IconScaling(X, Y)
+	local icon_crop = 0.15-- The abound of Icon zoom (crop of its borders) Can me any value from 0 to 1 but more than 0.3 hardly makes much sence.
+	local icon_offset_X = 0.5  -- Horizontal position of the shown texture (0 - shows the leftmost part, 1 shows the rightmost part)
+	local icon_offset_Y = 0.5  -- Vertical position of the shown texture (0 - shows the topmost part, 1 shows the bottommost part)
+
+	local length_X = (1 - icon_crop) * (X / math_max(X,Y)) 
+	local length_Y = (1 - icon_crop) * (Y / math_max(X,Y)) 
+	local axis_X = (icon_crop + length_X) * 0.5 + icon_offset_X * (1 - icon_crop - length_X)   
+	local axis_Y = (icon_crop + length_Y) * 0.5 + icon_offset_Y * (1 - icon_crop - length_Y) 
+	local X1 = axis_X - length_X * 0.5 
+	local X2 = axis_X + length_X * 0.5 
+	local Y1 = axis_Y - length_Y * 0.5 
+	local Y2 = axis_Y + length_Y * 0.5 
+
+	return X1, X2, Y1, Y2
+end
+
 local function sNamePlates_NameplateColoring(r, g, b, a)
 	if g + b == 0 then 
 		newr = sNamePlates.db.profile.hostileColor.r
@@ -189,24 +206,68 @@ local function sNamePlates_NameplateColoring(r, g, b, a)
 	return newr, newg, newb, newa
 end	
 
-local function IconScaling(X, Y)
-	local icon_crop = 0.15-- The abound of Icon zoom (crop of its borders) Can me any value from 0 to 1 but more than 0.3 hardly makes much sence.
-	local icon_offset_X = 0.5  -- Horizontal position of the shown texture (0 - shows the leftmost part, 1 shows the rightmost part)
-	local icon_offset_Y = 0.5  -- Vertical position of the shown texture (0 - shows the topmost part, 1 shows the bottommost part)
+local function sNamePlates_NameplateBorderColoring(self, gr, gg, gb)
+	if sNamePlates.db.profile.NMToggle then
+		if sNamePlates.db.profile.NMToggleBorderToo then
+			if gr > 0.99 and gg == 0 and gb == 0 then 
+				self.hpGlow:SetBackdropBorderColor(sNamePlates.db.profile.NMAttackingColor.r, sNamePlates.db.profile.NMAttackingColor.g, sNamePlates.db.profile.NMAttackingColor.b, sNamePlates.db.profile.NMAttackingColor.a)
+				self.cbGlow:SetBackdropBorderColor(sNamePlates.db.profile.NMAttackingColor.r, sNamePlates.db.profile.NMAttackingColor.g, sNamePlates.db.profile.NMAttackingColor.b, sNamePlates.db.profile.NMAttackingColor.a)
+				self.castbarIconGlow:SetBackdropBorderColor(sNamePlates.db.profile.NMAttackingColor.r, sNamePlates.db.profile.NMAttackingColor.g, sNamePlates.db.profile.NMAttackingColor.b, sNamePlates.db.profile.NMAttackingColor.a)
+			elseif gb < 0.5 then
+				self.hpGlow:SetBackdropBorderColor(sNamePlates.db.profile.NMAboutAttackingColor.r, sNamePlates.db.profile.NMAboutAttackingColor.g, sNamePlates.db.profile.NMAboutAttackingColor.b, sNamePlates.db.profile.NMAboutAttackingColor.a)
+				self.cbGlow:SetBackdropBorderColor(sNamePlates.db.profile.NMAboutAttackingColor.r, sNamePlates.db.profile.NMAboutAttackingColor.g, sNamePlates.db.profile.NMAboutAttackingColor.b, sNamePlates.db.profile.NMAboutAttackingColor.a)
+				self.castbarIconGlow:SetBackdropBorderColor(sNamePlates.db.profile.NMAboutAttackingColor.r, sNamePlates.db.profile.NMAboutAttackingColor.g, sNamePlates.db.profile.NMAboutAttackingColor.b, sNamePlates.db.profile.NMAboutAttackingColor.a)
+			end
+		else 
+			self.hpGlow:SetBackdropBorderColor(sNamePlates.db.profile.healthbarBorderColor.r, sNamePlates.db.profile.healthbarBorderColor.g, sNamePlates.db.profile.healthbarBorderColor.b, sNamePlates.db.profile.healthbarBorderColor.a)
+			self.cbGlow:SetBackdropBorderColor(sNamePlates.db.profile.castbarBorderColor.r, sNamePlates.db.profile.castbarBorderColor.g, sNamePlates.db.profile.castbarBorderColor.b, sNamePlates.db.profile.castbarBorderColor.a)
+			self.castbarIconGlow:SetBackdropBorderColor(sNamePlates.db.profile.castbarIconBorderColor.r, sNamePlates.db.profile.castbarIconBorderColor.g, sNamePlates.db.profile.castbarIconBorderColor.b, sNamePlates.db.profile.castbarIconBorderColor.a)		
+		end	
+	elseif sNamePlates.db.profile.TMToggle then 
+		if gr> 0.99 and gg== 0 and gb == 0 then 
+			self.healthbar:SetStatusBarColor(sNamePlates.db.profile.TMAttackingColor.r, sNamePlates.db.profile.TMAttackingColor.g, sNamePlates.db.profile.TMAttackingColor.b, sNamePlates.db.profile.TMAttackingColor.a)
 
-	local length_X = (1 - icon_crop) * (X / math_max(X,Y)) 
-	local length_Y = (1 - icon_crop) * (Y / math_max(X,Y)) 
-	local axis_X = (icon_crop + length_X) * 0.5 + icon_offset_X * (1 - icon_crop - length_X)   
-	local axis_Y = (icon_crop + length_Y) * 0.5 + icon_offset_Y * (1 - icon_crop - length_Y) 
-	local X1 = axis_X - length_X * 0.5 
-	local X2 = axis_X + length_X * 0.5 
-	local Y1 = axis_Y - length_Y * 0.5 
-	local Y2 = axis_Y + length_Y * 0.5 
+			if sNamePlates.db.profile.TMToggleBorderToo then
+				self.hpGlow:SetBackdropBorderColor(sNamePlates.db.profile.TMAttackingColor.r, sNamePlates.db.profile.TMAttackingColor.g, sNamePlates.db.profile.TMAttackingColor.b, sNamePlates.db.profile.TMAttackingColor.a)
+				self.cbGlow:SetBackdropBorderColor(sNamePlates.db.profile.TMAttackingColor.r, sNamePlates.db.profile.TMAttackingColor.g, sNamePlates.db.profile.TMAttackingColor.b, sNamePlates.db.profile.TMAttackingColor.a)
+				self.castbarIconGlow:SetBackdropBorderColor(sNamePlates.db.profile.TMAttackingColor.r, sNamePlates.db.profile.TMAttackingColor.g, sNamePlates.db.profile.TMAttackingColor.b, sNamePlates.db.profile.TMAttackingColor.a)
+			end
+		elseif gb < 0.5 then
+			self.healthbar:SetStatusBarColor(sNamePlates.db.profile.TMAboutAttackingColor.r, sNamePlates.db.profile.TMAboutAttackingColor.g, sNamePlates.db.profile.TMAboutAttackingColor.b, sNamePlates.db.profile.TMAboutAttackingColor.a)
+	
+			if sNamePlates.db.profile.TMToggleBorderToo then
+				self.hpGlow:SetBackdropBorderColor(sNamePlates.db.profile.TMAboutAttackingColor.r, sNamePlates.db.profile.TMAboutAttackingColor.g, sNamePlates.db.profile.TMAboutAttackingColor.b, sNamePlates.db.profile.TMAboutAttackingColor.a)
+				self.cbGlow:SetBackdropBorderColor(sNamePlates.db.profile.TMAboutAttackingColor.r, sNamePlates.db.profile.TMAboutAttackingColor.g, sNamePlates.db.profile.TMAboutAttackingColor.b, sNamePlates.db.profile.TMAboutAttackingColor.a)
+				self.castbarIconGlow:SetBackdropBorderColor(sNamePlates.db.profile.TMAboutAttackingColor.r, sNamePlates.db.profile.TMAboutAttackingColor.g, sNamePlates.db.profile.TMAboutAttackingColor.b, sNamePlates.db.profile.TMAboutAttackingColor.a)
+			end
+		end	
+	end	
+	self.oldglowr, self.oldglowg, self.oldglowb = gr, gg, gb
+end	
 
-	return X1, X2, Y1, Y2
+local function sNamePlates_CheckForBorderChange(self)
+	if self.oldglow:IsShown() then 
+		local glowr, glowg, glowb = self.oldglow:GetVertexColor()
+		if not (glowr == self.oldglowr and glowg == self.oldglowg and glowb == self.oldglowb) then 
+			print("different color of border")
+			sNamePlates_NameplateBorderColoring(self, glowr, glowg, glowb)
+			self.borderHidden = true
+		end
+	else
+		if self.borderHidden then 
+			if sNamePlates.db.profile.TMToggle then 
+				self.healthbar:SetStatusBarColor(sNamePlates_NameplateColoring(self.r, self.g, self.b, self.a))
+			end	
+			self.hpGlow:SetBackdropBorderColor(sNamePlates.db.profile.healthbarBorderColor.r, sNamePlates.db.profile.healthbarBorderColor.g, sNamePlates.db.profile.healthbarBorderColor.b, sNamePlates.db.profile.healthbarBorderColor.a)
+			self.cbGlow:SetBackdropBorderColor(sNamePlates.db.profile.castbarBorderColor.r, sNamePlates.db.profile.castbarBorderColor.g, sNamePlates.db.profile.castbarBorderColor.b, sNamePlates.db.profile.castbarBorderColor.a)
+			self.castbarIconGlow:SetBackdropBorderColor(sNamePlates.db.profile.castbarIconBorderColor.r, sNamePlates.db.profile.castbarIconBorderColor.g, sNamePlates.db.profile.castbarIconBorderColor.b, sNamePlates.db.profile.castbarIconBorderColor.a)	
+			self.oldglowr, self.oldglowg, self.oldglowb, self.borderHidden = nil, nil, nil, nil
+			print("border nil")
+		end
+	end	
 end
 
-local function sNamePlates_CheckForChange(self)
+local function sNamePlates_CheckForOptionsChange(self)
 	if sNamePlates.db.profile.optionChanged then
 		local changed = sNamePlates.db.profile.optionChanged
 		if changed == "nameplateColor" then
@@ -298,9 +359,8 @@ local function sNamePlates_CheckForChange(self)
 			if sNamePlates.db.profile.healthPercentToggle and sNamePlates.db.profile.healthAmmountToggle then
 				self.hpPercent:SetFont(FetchFont(sNamePlates.db.profile.healthPercentFont), sNamePlates.db.profile.healthPercentFontSize, sNamePlates.db.profile.healthPercentOutline)
 				self.hpText:SetFont(FetchFont(sNamePlates.db.profile.healthAmmountFont), sNamePlates.db.profile.healthAmmountFontSize, sNamePlates.db.profile.healthAmmountOutline)
-				
-				self.hpText:SetPoint("CENTER", (sNamePlates.db.profile.nameplateWidth - self.hpText:GetWidth())/2 , 0)
-				self.hpPercent:SetPoint("CENTER", (-sNamePlates.db.profile.nameplateWidth + self.hpPercent:GetWidth())/2 , 0)
+				self.hpText:SetPoint("LEFT", self.healthbar, 0, 0)
+				self.hpPercent:SetPoint("RIGHT", self.healthbar, 0, 0)
 				self.hpPercent:Show()
 				self.hpText:Show()
 				if sNamePlates.db.profile.shHealthPercentSelect  then
@@ -316,8 +376,8 @@ local function sNamePlates_CheckForChange(self)
 				end
 			elseif sNamePlates.db.profile.healthPercentToggle and not sNamePlates.db.profile.healthAmmountToggle then 
 				self.hpPercent:SetFont(FetchFont(sNamePlates.db.profile.healthPercentFont), sNamePlates.db.profile.healthPercentFontSize, sNamePlates.db.profile.healthPercentOutline)
-
-				self.hpPercent:SetPoint("CENTER", 0, 0)
+				self.hpPercent:ClearAllPoints()
+				self.hpPercent:SetPoint("CENTER", self.healthbar, 0, 0)
 				self.hpPercent:Show()
 				if sNamePlates.db.profile.shHealthPercentSelect  then
 					self.hpPercent:SetShadowOffset(1.25, -1.25)
@@ -327,8 +387,8 @@ local function sNamePlates_CheckForChange(self)
 				self.hpText:Hide()
 			elseif not sNamePlates.db.profile.healthPercentToggle and sNamePlates.db.profile.healthAmmountToggle then
 				self.hpText:SetFont(FetchFont(sNamePlates.db.profile.healthAmmountFont), sNamePlates.db.profile.healthAmmountFontSize, sNamePlates.db.profile.healthAmmountOutline)
-
-				self.hpText:SetPoint("CENTER", 0, 0)
+				self.hpText:ClearAllPoints()
+				self.hpText:SetPoint("CENTER", self.healthbar, 0, 0)
 				self.hpText:Show()
 				if sNamePlates.db.profile.shHealthAmmountSelect  then
 					self.hpText:SetShadowOffset(1.25, -1.25)
@@ -462,99 +522,22 @@ local function sNamePlates_FrameOnUpdate(self, elapsed)
 
 		--Options Update
 		if ACD.OpenFrames["sNamePlates"] then
-			self:CheckForChange()
+			self:CheckForOptionsChange()
 		end
-
-		--Healthbar Percent and Ammount points
-		if sNamePlates.db.profile.healthPercentToggle and sNamePlates.db.profile.healthAmmountToggle then
-			self.hpText:SetPoint("CENTER", (sNamePlates.db.profile.nameplateWidth - self.hpText:GetWidth())/2 , 0)
-			self.hpPercent:SetPoint("CENTER", (-sNamePlates.db.profile.nameplateWidth + self.hpPercent:GetWidth())/2 , 0)
-		elseif sNamePlates.db.profile.healthPercentToggle and not sNamePlates.db.profile.healthAmmountToggle then 
-			self.hpPercent:SetPoint("CENTER", 0, 0)
-		elseif not sNamePlates.db.profile.healthPercentToggle and sNamePlates.db.profile.healthAmmountToggle then
-			self.hpText:SetPoint("CENTER", 0, 0)
-		end  
-
-	--[[ 		
-		--Raid Icon Color                                               **pending
-		if self.castbar then		
-			newr, newg, newb = 0.7, 0.06, 0.84
-			self.healthbar:SetStatusBarColor(newr, newg, newb)
-			self.r, self.g, self.b = newr, newg, newb
-			print("diamond")
-		else
-			print("not diamond")
-		end 
-	]]
 
 		--NM - TM
-		if sNamePlates.db.profile.NMToggle then
-			self.healthbar:SetStatusBarColor(sNamePlates_NameplateColoring(self.r, self.g, self.b, self.a))
-			if not self.oldglow:IsShown() then
-				self.hpGlow:SetBackdropBorderColor(sNamePlates.db.profile.healthbarBorderColor.r, sNamePlates.db.profile.healthbarBorderColor.g, sNamePlates.db.profile.healthbarBorderColor.b, sNamePlates.db.profile.healthbarBorderColor.a)
-				self.cbGlow:SetBackdropBorderColor(sNamePlates.db.profile.castbarBorderColor.r, sNamePlates.db.profile.castbarBorderColor.g, sNamePlates.db.profile.castbarBorderColor.b, sNamePlates.db.profile.castbarBorderColor.a)
-				self.castbarIconGlow:SetBackdropBorderColor(sNamePlates.db.profile.castbarIconBorderColor.r, sNamePlates.db.profile.castbarIconBorderColor.g, sNamePlates.db.profile.castbarIconBorderColor.b, sNamePlates.db.profile.castbarIconBorderColor.a)
-			else
-				local glowr, glowg, glowb, glowa = self.oldglow:GetVertexColor()
-				if glowr > 0.99 and glowg == 0 and glowb == 0 then 
-					if sNamePlates.db.profile.NMToggleBorderToo then
-						self.hpGlow:SetBackdropBorderColor(sNamePlates.db.profile.NMAttackingColor.r, sNamePlates.db.profile.NMAttackingColor.g, sNamePlates.db.profile.NMAttackingColor.b, sNamePlates.db.profile.NMAttackingColor.a)
-						self.cbGlow:SetBackdropBorderColor(sNamePlates.db.profile.NMAttackingColor.r, sNamePlates.db.profile.NMAttackingColor.g, sNamePlates.db.profile.NMAttackingColor.b, sNamePlates.db.profile.NMAttackingColor.a)
-						self.castbarIconGlow:SetBackdropBorderColor(sNamePlates.db.profile.NMAttackingColor.r, sNamePlates.db.profile.NMAttackingColor.g, sNamePlates.db.profile.NMAttackingColor.b, sNamePlates.db.profile.NMAttackingColor.a)
-					else 
-						self.hpGlow:SetBackdropBorderColor(sNamePlates.db.profile.healthbarBorderColor.r, sNamePlates.db.profile.healthbarBorderColor.g, sNamePlates.db.profile.healthbarBorderColor.b, sNamePlates.db.profile.healthbarBorderColor.a)
-						self.cbGlow:SetBackdropBorderColor(sNamePlates.db.profile.castbarBorderColor.r, sNamePlates.db.profile.castbarBorderColor.g, sNamePlates.db.profile.castbarBorderColor.b, sNamePlates.db.profile.castbarBorderColor.a)
-						self.castbarIconGlow:SetBackdropBorderColor(sNamePlates.db.profile.castbarIconBorderColor.r, sNamePlates.db.profile.castbarIconBorderColor.g, sNamePlates.db.profile.castbarIconBorderColor.b, sNamePlates.db.profile.castbarIconBorderColor.a)
-					end
-				elseif glowr > 0.99 and glowg  > 0.99 and glowb > 0.46 then
-					if sNamePlates.db.profile.NMToggleBorderToo then
-						self.hpGlow:SetBackdropBorderColor(sNamePlates.db.profile.NMAboutAttackingColor.r, sNamePlates.db.profile.NMAboutAttackingColor.g, sNamePlates.db.profile.NMAboutAttackingColor.b, sNamePlates.db.profile.NMAboutAttackingColor.a)
-					self.cbGlow:SetBackdropBorderColor(sNamePlates.db.profile.NMAboutAttackingColor.r, sNamePlates.db.profile.NMAboutAttackingColor.g, sNamePlates.db.profile.NMAboutAttackingColor.b, sNamePlates.db.profile.NMAboutAttackingColor.a)
-					self.castbarIconGlow:SetBackdropBorderColor(sNamePlates.db.profile.NMAboutAttackingColor.r, sNamePlates.db.profile.NMAboutAttackingColor.g, sNamePlates.db.profile.NMAboutAttackingColor.b, sNamePlates.db.profile.NMAboutAttackingColor.a)
-					else 
-						self.hpGlow:SetBackdropBorderColor(sNamePlates.db.profile.healthbarBorderColor.r, sNamePlates.db.profile.healthbarBorderColor.g, sNamePlates.db.profile.healthbarBorderColor.b, sNamePlates.db.profile.healthbarBorderColor.a)
-						self.cbGlow:SetBackdropBorderColor(sNamePlates.db.profile.castbarBorderColor.r, sNamePlates.db.profile.castbarBorderColor.g, sNamePlates.db.profile.castbarBorderColor.b, sNamePlates.db.profile.castbarBorderColor.a)
-						self.castbarIconGlow:SetBackdropBorderColor(sNamePlates.db.profile.castbarIconBorderColor.r, sNamePlates.db.profile.castbarIconBorderColor.g, sNamePlates.db.profile.castbarIconBorderColor.b, sNamePlates.db.profile.castbarIconBorderColor.a)
-					end
-				end	
-			end 
-		elseif sNamePlates.db.profile.TMToggle then
-			if not self.oldglow:IsShown() then
-				self.hpGlow:SetBackdropBorderColor(sNamePlates.db.profile.healthbarBorderColor.r, sNamePlates.db.profile.healthbarBorderColor.g, sNamePlates.db.profile.healthbarBorderColor.b, sNamePlates.db.profile.healthbarBorderColor.a)
-				self.cbGlow:SetBackdropBorderColor(sNamePlates.db.profile.castbarBorderColor.r, sNamePlates.db.profile.castbarBorderColor.g, sNamePlates.db.profile.castbarBorderColor.b, sNamePlates.db.profile.castbarBorderColor.a)
-				self.castbarIconGlow:SetBackdropBorderColor(sNamePlates.db.profile.castbarIconBorderColor.r, sNamePlates.db.profile.castbarIconBorderColor.g, sNamePlates.db.profile.castbarIconBorderColor.b, sNamePlates.db.profile.castbarIconBorderColor.a)
-				
-				self.healthbar:SetStatusBarColor(sNamePlates_NameplateColoring(self.r, self.g, self.b, self.a))
-			else
-				local glowr, glowg, glowb, glowa = self.oldglow:GetVertexColor()
-				if glowr > 0.99 and glowg == 0 and glowb == 0 then 
-					self.healthbar:SetStatusBarColor(sNamePlates.db.profile.TMAttackingColor.r, sNamePlates.db.profile.TMAttackingColor.g, sNamePlates.db.profile.TMAttackingColor.b, sNamePlates.db.profile.TMAttackingColor.a)
-		
-					if sNamePlates.db.profile.TMToggleBorderToo then
-						self.hpGlow:SetBackdropBorderColor(sNamePlates.db.profile.TMAttackingColor.r, sNamePlates.db.profile.TMAttackingColor.g, sNamePlates.db.profile.TMAttackingColor.b, sNamePlates.db.profile.TMAttackingColor.a)
-						self.cbGlow:SetBackdropBorderColor(sNamePlates.db.profile.TMAttackingColor.r, sNamePlates.db.profile.TMAttackingColor.g, sNamePlates.db.profile.TMAttackingColor.b, sNamePlates.db.profile.TMAttackingColor.a)
-						self.castbarIconGlow:SetBackdropBorderColor(sNamePlates.db.profile.TMAttackingColor.r, sNamePlates.db.profile.TMAttackingColor.g, sNamePlates.db.profile.TMAttackingColor.b, sNamePlates.db.profile.TMAttackingColor.a)
-					else 
-						self.hpGlow:SetBackdropBorderColor(sNamePlates.db.profile.healthbarBorderColor.r, sNamePlates.db.profile.healthbarBorderColor.g, sNamePlates.db.profile.healthbarBorderColor.b, sNamePlates.db.profile.healthbarBorderColor.a)
-						self.cbGlow:SetBackdropBorderColor(sNamePlates.db.profile.castbarBorderColor.r, sNamePlates.db.profile.castbarBorderColor.g, sNamePlates.db.profile.castbarBorderColor.b, sNamePlates.db.profile.castbarBorderColor.a)
-						self.castbarIconGlow:SetBackdropBorderColor(sNamePlates.db.profile.castbarIconBorderColor.r, sNamePlates.db.profile.castbarIconBorderColor.g, sNamePlates.db.profile.castbarIconBorderColor.b, sNamePlates.db.profile.castbarIconBorderColor.a)
-					end
-				elseif glowr > 0.99 and glowg  > 0.99 and glowb > 0.46 then
-					self.healthbar:SetStatusBarColor(sNamePlates.db.profile.TMAboutAttackingColor.r, sNamePlates.db.profile.TMAboutAttackingColor.g, sNamePlates.db.profile.TMAboutAttackingColor.b, sNamePlates.db.profile.TMAboutAttackingColor.a)
-			
-					if sNamePlates.db.profile.TMToggleBorderToo then
-						self.hpGlow:SetBackdropBorderColor(sNamePlates.db.profile.TMAboutAttackingColor.r, sNamePlates.db.profile.TMAboutAttackingColor.g, sNamePlates.db.profile.TMAboutAttackingColor.b, sNamePlates.db.profile.TMAboutAttackingColor.a)
-						self.cbGlow:SetBackdropBorderColor(sNamePlates.db.profile.TMAboutAttackingColor.r, sNamePlates.db.profile.TMAboutAttackingColor.g, sNamePlates.db.profile.TMAboutAttackingColor.b, sNamePlates.db.profile.TMAboutAttackingColor.a)
-						self.castbarIconGlow:SetBackdropBorderColor(sNamePlates.db.profile.TMAboutAttackingColor.r, sNamePlates.db.profile.TMAboutAttackingColor.g, sNamePlates.db.profile.TMAboutAttackingColor.b, sNamePlates.db.profile.TMAboutAttackingColor.a)
-					else 
-						self.hpGlow:SetBackdropBorderColor(sNamePlates.db.profile.healthbarBorderColor.r, sNamePlates.db.profile.healthbarBorderColor.g, sNamePlates.db.profile.healthbarBorderColor.b, sNamePlates.db.profile.healthbarBorderColor.a)
-						self.cbGlow:SetBackdropBorderColor(sNamePlates.db.profile.castbarBorderColor.r, sNamePlates.db.profile.castbarBorderColor.g, sNamePlates.db.profile.castbarBorderColor.b, sNamePlates.db.profile.castbarBorderColor.a)
-						self.castbarIconGlow:SetBackdropBorderColor(sNamePlates.db.profile.castbarIconBorderColor.r, sNamePlates.db.profile.castbarIconBorderColor.g, sNamePlates.db.profile.castbarIconBorderColor.b, sNamePlates.db.profile.castbarIconBorderColor.a)
-					end
-				end	
-			end
-		end
+		self:CheckForBorderChange()
 
+	--[[ 		--Raid Icon Color                                               **TODO: handle icon by GUID
+			if self.castbar then		
+				newr, newg, newb = 0.7, 0.06, 0.84
+				self.healthbar:SetStatusBarColor(newr, newg, newb)
+				self.r, self.g, self.b = newr, newg, newb
+				print("diamond")
+			else
+				print("not diamond")
+			end  ]]
+ 
 		--On target
 		if targetExist and self:GetAlpha() == 1 then	
 			self.highlight:Hide()
@@ -578,7 +561,7 @@ local function sNamePlates_FrameOnUpdate(self, elapsed)
 			self.rightIndicator:Hide() 
 			--if targetExist then
 			--	if sNamePlates.db.profile.alphaToggle then
-			--	self:SetAlpha(sNamePlates.db.profile.alphaValue)      **disabled since nameplates not running frame by frame
+			--	self:SetAlpha(sNamePlates.db.profile.alphaValue)      **disabled since the addon is not running frame by frame
 			--	end	
 			--end
 		end 
@@ -588,6 +571,7 @@ end
 
 local function sNamePlates_UpdateFrame(self)
 	self.specialIcon:Hide()
+	self.borderHidden = true
 	
 	--Nameplate Coloring
 	self.r, self.g, self.b, self.a = self.healthbar:GetStatusBarColor()
@@ -597,6 +581,9 @@ local function sNamePlates_UpdateFrame(self)
  	self.leftIndicator:Hide()
 	self.rightIndicator:Hide()  
 
+	--NM - TM
+	self:CheckForBorderChange()
+
  	--Healthbar
 	self.healthbar:SetStatusBarTexture(FetchStatusbar(sNamePlates.db.profile.nameplateTexture))
 	self.healthbar:SetHeight(sNamePlates.db.profile.nameplateHeight)
@@ -605,8 +592,6 @@ local function sNamePlates_UpdateFrame(self)
 	self.healthbar:SetPoint("CENTER", self.healthbar:GetParent(), sNamePlates.db.profile.nameplateXOffset, sNamePlates.db.profile.nameplateYOffset)
 
 	--Highlight
-	self.highlight:SetTexture(FetchStatusbar(sNamePlates.db.profile.highlightTexture))
-	self.highlight:SetVertexColor(sNamePlates.db.profile.highlightColor.r, sNamePlates.db.profile.highlightColor.g, sNamePlates.db.profile.highlightColor.b, sNamePlates.db.profile.highlightColor.a)
 	self.highlight:ClearAllPoints()
 	self.highlight:SetAllPoints(self.healthbar) 
 
@@ -645,35 +630,21 @@ local function sNamePlates_UpdateFrame(self)
 		self.hpText:Hide()
 	end  
 
+	--Healthbar Percent and Ammount points
+	if sNamePlates.db.profile.healthPercentToggle and sNamePlates.db.profile.healthAmmountToggle then
+		self.hpText:SetPoint("LEFT", self.healthbar, 0, 0)
+		self.hpPercent:SetPoint("RIGHT", self.healthbar, 0, 0)
+	elseif sNamePlates.db.profile.healthPercentToggle and not sNamePlates.db.profile.healthAmmountToggle then 
+		self.hpPercent:SetPoint("CENTER", 0, 0)
+	elseif not sNamePlates.db.profile.healthPercentToggle and sNamePlates.db.profile.healthAmmountToggle then
+		self.hpText:SetPoint("CENTER", 0, 0)
+	end  
+
 	--Raid Icon
 	self.raidIcon:SetHeight(sNamePlates.db.profile.RIheight)
 	self.raidIcon:SetWidth(sNamePlates.db.profile.RIwidth)
 	self.raidIcon:ClearAllPoints()
 	self.raidIcon:SetPoint("CENTER", self.healthbar, "CENTER", sNamePlates.db.profile.RIXOffset, sNamePlates.db.profile.RIYOffset)
-	
-	--Threat
-	if sNamePlates.db.profile.aggroBorderToggle then
-		if not self.oldglow:IsShown() then
-			self.hpGlow:SetBackdropBorderColor(sNamePlates.db.profile.healthbarBorderColor.r, sNamePlates.db.profile.healthbarBorderColor.g, sNamePlates.db.profile.healthbarBorderColor.b, sNamePlates.db.profile.healthbarBorderColor.a)
-			self.cbGlow:SetBackdropBorderColor(sNamePlates.db.profile.castbarBorderColor.r, sNamePlates.db.profile.castbarBorderColor.g, sNamePlates.db.profile.castbarBorderColor.b, sNamePlates.db.profile.castbarBorderColor.a)
-			self.castbarIconGlow:SetBackdropBorderColor(sNamePlates.db.profile.castbarIconBorderColor.r, sNamePlates.db.profile.castbarIconBorderColor.g, sNamePlates.db.profile.castbarIconBorderColor.b, sNamePlates.db.profile.castbarIconBorderColor.a)
-		else
-			local glowr, glowg, glowb, glowa = self.oldglow:GetVertexColor()
-			if glowr > 0.99 and glowg == 0 and glowb == 0 then 
-				self.hpGlow:SetBackdropBorderColor(sNamePlates.db.profile.NMAttackingColor.r, sNamePlates.db.profile.NMAttackingColor.g, sNamePlates.db.profile.NMAttackingColor.b, sNamePlates.db.profile.NMAttackingColor.a)
-				self.cbGlow:SetBackdropBorderColor(sNamePlates.db.profile.NMAttackingColor.r, sNamePlates.db.profile.NMAttackingColor.g, sNamePlates.db.profile.NMAttackingColor.b, sNamePlates.db.profile.NMAttackingColor.a)
-				self.castbarIconGlow:SetBackdropBorderColor(sNamePlates.db.profile.NMAttackingColor.r, sNamePlates.db.profile.NMAttackingColor.g, sNamePlates.db.profile.NMAttackingColor.b, sNamePlates.db.profile.NMAttackingColor.a)
-			elseif glowr > 0.99 and glowg  > 0.99 and glowb > 0.46 then
-				self.hpGlow:SetBackdropBorderColor(sNamePlates.db.profile.NMAboutAttackingColor.r, sNamePlates.db.profile.NMAboutAttackingColor.g, sNamePlates.db.profile.NMAboutAttackingColor.b, sNamePlates.db.profile.NMAboutAttackingColor.a)
-				self.cbGlow:SetBackdropBorderColor(sNamePlates.db.profile.NMAboutAttackingColor.r, sNamePlates.db.profile.NMAboutAttackingColor.g, sNamePlates.db.profile.NMAboutAttackingColor.b, sNamePlates.db.profile.NMAboutAttackingColor.a)
-				self.castbarIconGlow:SetBackdropBorderColor(sNamePlates.db.profile.NMAboutAttackingColor.r, sNamePlates.db.profile.NMAboutAttackingColor.g, sNamePlates.db.profile.NMAboutAttackingColor.b, sNamePlates.db.profile.NMAboutAttackingColor.a)
-			end	
-		end 
-	else	
-		self.hpGlow:SetBackdropBorderColor(sNamePlates.db.profile.healthbarBorderColor.r, sNamePlates.db.profile.healthbarBorderColor.g, sNamePlates.db.profile.healthbarBorderColor.b, sNamePlates.db.profile.healthbarBorderColor.a)
-		self.cbGlow:SetBackdropBorderColor(sNamePlates.db.profile.castbarBorderColor.r, sNamePlates.db.profile.castbarBorderColor.g, sNamePlates.db.profile.castbarBorderColor.b, sNamePlates.db.profile.castbarBorderColor.a)
-		self.castbarIconGlow:SetBackdropBorderColor(sNamePlates.db.profile.castbarIconBorderColor.r, sNamePlates.db.profile.castbarIconBorderColor.g, sNamePlates.db.profile.castbarIconBorderColor.b, sNamePlates.db.profile.castbarIconBorderColor.a)
-	end
 
 	--Target Indicator
 	if sNamePlates.db.profile.inverseSelect then 
@@ -941,20 +912,20 @@ local function sNamePlates_CreateFrame(frame)
 	frame.hpGlow:SetBackdrop(backdrop)
 	frame.hpGlow:SetBackdropColor(sNamePlates.db.profile.healthbarBorderColor.r, sNamePlates.db.profile.healthbarBorderColor.g, sNamePlates.db.profile.healthbarBorderColor.b, sNamePlates.db.profile.healthbarBorderColor.a)
 	frame.hpGlow:SetBackdropBorderColor(sNamePlates.db.profile.healthbarBorderColor.r, sNamePlates.db.profile.healthbarBorderColor.g, sNamePlates.db.profile.healthbarBorderColor.b, sNamePlates.db.profile.healthbarBorderColor.a)
-
+	
 	frame.cbGlow = CreateFrame("Frame", nil, frame.castbar)
 	frame.cbGlow:SetPoint("TOPLEFT", frame.castbar, "TOPLEFT", -5, 5)
 	frame.cbGlow:SetPoint("BOTTOMRIGHT", frame.castbar, "BOTTOMRIGHT", 5, -5)
 	frame.cbGlow:SetBackdrop(backdrop)
 	frame.cbGlow:SetBackdropColor(sNamePlates.db.profile.castbarBorderColor.r, sNamePlates.db.profile.castbarBorderColor.g, sNamePlates.db.profile.castbarBorderColor.b, sNamePlates.db.profile.castbarBorderColor.a)
 	frame.cbGlow:SetBackdropBorderColor(sNamePlates.db.profile.castbarBorderColor.r, sNamePlates.db.profile.castbarBorderColor.g, sNamePlates.db.profile.castbarBorderColor.b, sNamePlates.db.profile.castbarBorderColor.a)
-
+		
 	frame.castbarIconGlow = CreateFrame("Frame", nil, frame.castbar)
 	frame.castbarIconGlow:SetPoint("TOPLEFT", frame.castbarIcon, "TOPLEFT", -5, 5)
 	frame.castbarIconGlow:SetPoint("BOTTOMRIGHT", frame.castbarIcon, "BOTTOMRIGHT", 5, -5)
     frame.castbarIconGlow:SetBackdrop(backdrop)
     frame.castbarIconGlow:SetBackdropColor(sNamePlates.db.profile.castbarIconBorderColor.r, sNamePlates.db.profile.castbarIconBorderColor.g, sNamePlates.db.profile.castbarIconBorderColor.b, sNamePlates.db.profile.castbarIconBorderColor.a)
-    frame.castbarIconGlow:SetBackdropBorderColor(sNamePlates.db.profile.castbarIconBorderColor.r, sNamePlates.db.profile.castbarIconBorderColor.g, sNamePlates.db.profile.castbarIconBorderColor.b, sNamePlates.db.profile.castbarIconBorderColor.a)
+	frame.castbarIconGlow:SetBackdropBorderColor(sNamePlates.db.profile.castbarIconBorderColor.r, sNamePlates.db.profile.castbarIconBorderColor.g, sNamePlates.db.profile.castbarIconBorderColor.b, sNamePlates.db.profile.castbarIconBorderColor.a)
 
 	frame.castbar.cbTime = frame.castbar:CreateFontString(nil, "ARTWORK")
     frame.castbar.cbTime:SetPoint("RIGHT", frame.castbar, "RIGHT", sNamePlates.db.profile.castTimeXOffset, sNamePlates.db.profile.castTimeYOffset)
@@ -1011,7 +982,8 @@ local function sNamePlates_CreateFrame(frame)
     frame.hpPercent = percent.text
 
 	frame.FormatHealthText = sNamePlates_FormatHealthText
-	frame.CheckForChange = sNamePlates_CheckForChange
+	frame.CheckForOptionsChange = sNamePlates_CheckForOptionsChange
+	frame.CheckForBorderChange = sNamePlates_CheckForBorderChange
 
 	hp:SetWidth(hp.text:GetWidth())
     percent:SetWidth(percent.text:GetWidth())
