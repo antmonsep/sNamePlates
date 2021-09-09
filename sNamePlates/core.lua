@@ -249,7 +249,6 @@ local function sNamePlates_CheckForBorderChange(self)
 	if self.oldglow:IsShown() then 
 		local glowr, glowg, glowb = self.oldglow:GetVertexColor()
 		if not (glowr == self.oldglowr and glowg == self.oldglowg and glowb == self.oldglowb) then 
-			print("different color of border")
 			sNamePlates_NameplateBorderColoring(self, glowr, glowg, glowb)
 			self.borderHidden = true
 		end
@@ -262,7 +261,6 @@ local function sNamePlates_CheckForBorderChange(self)
 			self.cbGlow:SetBackdropBorderColor(sNamePlates.db.profile.castbarBorderColor.r, sNamePlates.db.profile.castbarBorderColor.g, sNamePlates.db.profile.castbarBorderColor.b, sNamePlates.db.profile.castbarBorderColor.a)
 			self.castbarIconGlow:SetBackdropBorderColor(sNamePlates.db.profile.castbarIconBorderColor.r, sNamePlates.db.profile.castbarIconBorderColor.g, sNamePlates.db.profile.castbarIconBorderColor.b, sNamePlates.db.profile.castbarIconBorderColor.a)	
 			self.oldglowr, self.oldglowg, self.oldglowb, self.borderHidden = nil, nil, nil, nil
-			print("border nil")
 		end
 	end	
 end
