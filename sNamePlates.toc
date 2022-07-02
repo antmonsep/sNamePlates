@@ -1,0 +1,12 @@
+## Interface: 40200
+## Version: 1.0
+## Title: s|cffffffccNamePlates|r
+## Author: Septimun
+## Notes: Minimalistic NamePlates.
+## SavedVariables: sNamePlatesDB
+## OptionalDeps: Ace3
+## X-Embeds: Ace3
+
+embeds.xml
+core.lua
+options.lua
