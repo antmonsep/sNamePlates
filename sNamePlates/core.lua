@@ -550,6 +550,11 @@ local function sNamePlates_UpdateFrame(self)
 	self.highlight:SetAllPoints(self.healthbar) 
 
 	--Castbar
+	self.castbar:SetStatusBarTexture(FetchStatusbar(sNamePlates.db.profile.nameplateTexture))
+	self.castbar:SetHeight(sNamePlates.db.profile.castbarHeight)
+	self.castbar:SetWidth(sNamePlates.db.profile.nameplateWidth)
+	self.castbar:ClearAllPoints()
+	self.castbar:SetPoint("TOP", frame.healthbar, "BOTTOM", 0, -sNamePlates.db.profile.separationValue)
 
 	--Healthbar Name
 	self.name:SetFont(FetchFont(sNamePlates.db.profile.nameFont), sNamePlates.db.profile.nameFontSize, sNamePlates.db.profile.nameOutline)
