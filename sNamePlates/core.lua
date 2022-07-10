@@ -214,7 +214,6 @@ local function sNamePlates_NameplateBorderColoring(self, gr, gg, gb)
 	elseif sNamePlates.db.profile.TMToggle then 
 		if gr> 0.99 and gg== 0 and gb == 0 then 
 			self.healthbar:SetStatusBarColor(sNamePlates.db.profile.TMAttackingColor.r, sNamePlates.db.profile.TMAttackingColor.g, sNamePlates.db.profile.TMAttackingColor.b, sNamePlates.db.profile.TMAttackingColor.a)
-
 			if sNamePlates.db.profile.TMToggleBorderToo then
 				self.hpGlow:SetBackdropBorderColor(sNamePlates.db.profile.TMAttackingColor.r, sNamePlates.db.profile.TMAttackingColor.g, sNamePlates.db.profile.TMAttackingColor.b, sNamePlates.db.profile.TMAttackingColor.a)
 				self.cbGlow:SetBackdropBorderColor(sNamePlates.db.profile.TMAttackingColor.r, sNamePlates.db.profile.TMAttackingColor.g, sNamePlates.db.profile.TMAttackingColor.b, sNamePlates.db.profile.TMAttackingColor.a)
@@ -509,8 +508,7 @@ end
 
 local function sNamePlates_UpdateFrame(self)
 	self.specialIcon:Hide()
-	self.borderHidden = true
-	
+
 	--Nameplate Coloring
 	self.r, self.g, self.b, self.a = self.healthbar:GetStatusBarColor()
 	--print(self.r.." - "..self.g.." - "..self.b.." - "..self.a)
@@ -652,6 +650,7 @@ end
 
 local function sNamePlates_OnHide(self)
 	self.highlight:Hide()
+	self.oldglowr, self.oldglowg, self.oldglowb, self.borderHidden = nil, nil, nil, nil
 end
 
 local function sNamePlates_CreateFrame(frame)
