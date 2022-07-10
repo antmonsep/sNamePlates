@@ -222,7 +222,7 @@ local function sNamePlates_NameplateBorderColoring(self, gr, gg, gb)
 			end
 		elseif gb < 0.5 then
 			self.healthbar:SetStatusBarColor(sNamePlates.db.profile.TMAboutAttackingColor.r, sNamePlates.db.profile.TMAboutAttackingColor.g, sNamePlates.db.profile.TMAboutAttackingColor.b, sNamePlates.db.profile.TMAboutAttackingColor.a)
-	
+
 			if sNamePlates.db.profile.TMToggleBorderToo then
 				self.hpGlow:SetBackdropBorderColor(sNamePlates.db.profile.TMAboutAttackingColor.r, sNamePlates.db.profile.TMAboutAttackingColor.g, sNamePlates.db.profile.TMAboutAttackingColor.b, sNamePlates.db.profile.TMAboutAttackingColor.a)
 				self.cbGlow:SetBackdropBorderColor(sNamePlates.db.profile.TMAboutAttackingColor.r, sNamePlates.db.profile.TMAboutAttackingColor.g, sNamePlates.db.profile.TMAboutAttackingColor.b, sNamePlates.db.profile.TMAboutAttackingColor.a)
@@ -261,7 +261,6 @@ local function sNamePlates_CheckForOptionsChange(self)
 		elseif changed == "nameplateSize" then
 			self.healthbar:SetHeight(sNamePlates.db.profile.nameplateHeight)
 			self.healthbar:SetWidth(sNamePlates.db.profile.nameplateWidth)
-
 			self.castbar:SetWidth(sNamePlates.db.profile.nameplateWidth)
 		elseif changed == "nameplateXY" then
 			self.healthbar:SetPoint("CENTER", self.healthbar:GetParent(), sNamePlates.db.profile.nameplateXOffset, sNamePlates.db.profile.nameplateYOffset)
@@ -300,10 +299,6 @@ local function sNamePlates_CheckForOptionsChange(self)
 			self.leftIndicator:SetVertexColor(sNamePlates.db.profile.TIColor.r, sNamePlates.db.profile.TIColor.g, sNamePlates.db.profile.TIColor.b, sNamePlates.db.profile.TIColor.a)
 		elseif changed == "castbarElementsSizes" then
 			self.castbar:SetHeight(sNamePlates.db.profile.castbarHeight)
-			self.castbarIcon:SetHeight(sNamePlates.db.profile.nameplateHeight + sNamePlates.db.profile.castbarHeight + sNamePlates.db.profile.separationValue)
-			self.castbarIcon:SetWidth(sNamePlates.db.profile.nameplateHeight + sNamePlates.db.profile.castbarHeight + sNamePlates.db.profile.separationValue)
-			self.castbarIcon:SetPoint("BOTTOMLEFT", self.castbar, "RIGHT", sNamePlates.db.profile.separationValue, -(sNamePlates.db.profile.castbarHeight/2)) 
-			self.castbar:SetPoint("TOP", self.healthbar, "BOTTOM", 0, -sNamePlates.db.profile.separationValue)
 		elseif changed == "castbarBordersColor" then
 			self.cbGlow:SetBackdropBorderColor(sNamePlates.db.profile.castbarBorderColor.r, sNamePlates.db.profile.castbarBorderColor.g, sNamePlates.db.profile.castbarBorderColor.b, sNamePlates.db.profile.castbarBorderColor.a)
 			self.castbarIconGlow:SetBackdropBorderColor(sNamePlates.db.profile.castbarIconBorderColor.r, sNamePlates.db.profile.castbarIconBorderColor.g, sNamePlates.db.profile.castbarIconBorderColor.b, sNamePlates.db.profile.castbarIconBorderColor.a)
@@ -392,7 +387,6 @@ local function sNamePlates_CheckForOptionsChange(self)
 				self.level:Hide()
 			end	 
 		elseif changed == "specialIcons" then
-			--self.healthbar:ClearAllPoints()
 			iconFound, iconPath = sNamePlates:iconsDB(self.name:GetText())
 			if sNamePlates.db.profile.iconsToggle and iconFound then
 				self.hpPercent:Hide()
@@ -490,16 +484,6 @@ local function sNamePlates_FrameOnUpdate(self, elapsed)
 		--NM - TM
 		self:CheckForBorderChange()
 
-	--[[ 		--Raid Icon Color                                               **TODO: handle icon by GUID
-			if self.castbar then		
-				newr, newg, newb = 0.7, 0.06, 0.84
-				self.healthbar:SetStatusBarColor(newr, newg, newb)
-				self.r, self.g, self.b = newr, newg, newb
-				print("diamond")
-			else
-				print("not diamond")
-			end  ]]
- 
 		--On target
 		if targetExist and self:GetAlpha() == 1 then	
 			self.highlight:Hide()
@@ -553,8 +537,6 @@ local function sNamePlates_UpdateFrame(self)
 	self.castbar:SetStatusBarTexture(FetchStatusbar(sNamePlates.db.profile.nameplateTexture))
 	self.castbar:SetHeight(sNamePlates.db.profile.castbarHeight)
 	self.castbar:SetWidth(sNamePlates.db.profile.nameplateWidth)
-	self.castbar:ClearAllPoints()
-	self.castbar:SetPoint("TOP", frame.healthbar, "BOTTOM", 0, -sNamePlates.db.profile.separationValue)
 
 	--Healthbar Name
 	self.name:SetFont(FetchFont(sNamePlates.db.profile.nameFont), sNamePlates.db.profile.nameFontSize, sNamePlates.db.profile.nameOutline)
@@ -683,8 +665,7 @@ local function sNamePlates_CreateFrame(frame)
 	frame.oldname = nameTextRegion
 	frame.oldname:Hide()
 
-	spellIconRegion:SetHeight(0.01)
-    spellIconRegion:SetWidth(0.01)
+	spellIconRegion:Hide()
 	
 	local newNameRegion = frame:CreateFontString()
 	newNameRegion:SetJustifyH("LEFT")
@@ -732,16 +713,15 @@ local function sNamePlates_CreateFrame(frame)
 		castBar:SetStatusBarTexture(FetchStatusbar(sNamePlates.db.profile.nameplateTexture))
 		castBar:SetHeight(sNamePlates.db.profile.castbarHeight)
 		castBar:SetWidth(sNamePlates.db.profile.nameplateWidth)
-		castBar:ClearAllPoints()
-		castBar:SetPoint("TOP", frame.healthbar, "BOTTOM", 0, -sNamePlates.db.profile.separationValue)
+		castBar:SetPoint("BOTTOM", frame.healthbar, "CENTER", -2, -20)
 	end)
 
 	frame.castbar = castBar
 
  	frame.castbarIcon = CreateFrame("Frame", nil, frame.castbar)
-	frame.castbarIcon:SetHeight(sNamePlates.db.profile.nameplateHeight + sNamePlates.db.profile.castbarHeight + sNamePlates.db.profile.separationValue)
-	frame.castbarIcon:SetWidth(sNamePlates.db.profile.nameplateHeight + sNamePlates.db.profile.castbarHeight + sNamePlates.db.profile.separationValue)
-	frame.castbarIcon:SetPoint("BOTTOMLEFT", frame.castbar, "RIGHT", sNamePlates.db.profile.separationValue, -(sNamePlates.db.profile.castbarHeight/2)) 
+	frame.castbarIcon:SetHeight(35)
+	frame.castbarIcon:SetWidth(35)
+	frame.castbarIcon:SetPoint("BOTTOMLEFT", frame.castbar, "RIGHT", sNamePlates.db.profile.nameplateHeight/2, -sNamePlates.db.profile.nameplateHeight/2) 
 
 	frame.castbarIcon.Texture = spellIconRegion
 	frame.castbarIcon.Texture:SetAllPoints(frame.castbarIcon)

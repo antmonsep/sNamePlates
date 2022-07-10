@@ -757,7 +757,7 @@ sNamePlates.options = {
                     desc = "The height of the castbar.",
                     order = 7,
                     min = 1,
-                    max= 15,
+                    max= 10,
                     step = 1,
                     set = function(info,val) 
                         sNamePlates.db.profile.castbarHeight = val 
@@ -765,22 +765,6 @@ sNamePlates.options = {
                     end,
                     get = function(info) 
                         return sNamePlates.db.profile.castbarHeight 
-                    end,
-                },
-                separationValue = {
-                    type = "range",
-                    name = "Separation",
-                    desc = "The separation value of the elements in the nameplate (castbar and castbar icon).",
-                    order = 8,
-                    min = 0,
-                    max= 10,
-                    step = 1,
-                    set = function(info,val) 
-                        sNamePlates.db.profile.separationValue = val 
-                        sNamePlates.db.profile.optionChanged = "castbarElementsSizes"
-                    end,
-                    get = function(info) 
-                        return sNamePlates.db.profile.separationValue
                     end,
                 },
                 castbarBorderColor = {
@@ -1566,7 +1550,7 @@ sNamePlates.defaults = {
         neutralColor = {["r"] = 1, ["g"] = 1, ["b"] = 0, ["a"] = 1},
         hostileColor = {["r"] = 1, ["g"] = 0, ["b"] = 0, ["a"] = 1},
 
-        nameplateWidth = 140,
+        nameplateWidth = 147,
         nameplateHeight = 14,
 
         nameplateTexture = "Armory",
@@ -1578,8 +1562,6 @@ sNamePlates.defaults = {
 
         nameplateXOffset = 0,
         nameplateYOffset = 0,
-
-        separationValue = 4,
 
         NMToggle = true,
         NMAttackingColor = {["r"] = 0.99, ["g"] = 0, ["b"] = 0, ["a"] = 1},
