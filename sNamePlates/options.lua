@@ -468,16 +468,18 @@ sNamePlates.options = {
                     type = "header",
                     name = "Alpha",
                     order = 1,
-                    hidden = true,
-                    disabled = true,
+                },
+                alphaDesc= {
+                    type = "description",
+                    order = 2,
+                    name = _format("|cFF00fffb%s|r Since the addon is not running frame by frame but slightly above it, sometimes this option might look like nameplates are blinking. I highly recommend keeping this option disabled so the alpha will be 0.5 (game standard). But if you are curious cat go ahead :).", "Note:"),
+                    fontSize = "large",
                 },
                 alphaToggle = {
                     type = "toggle",
                     name = "Enable",
                     desc = "Change alpha value when a target exist.",
-                    order = 2,
-                    hidden = true,
-                    disabled = true,
+                    order = 3,
                     set = function(info, val) 
                         sNamePlates.db.profile.alphaToggle = val 
                     end,
@@ -489,10 +491,8 @@ sNamePlates.options = {
                     type = "range",
                     name = "Alpha",
                     isPercent = true,
-                    disabled = true,
                     desc = "The alpha value of other nameplates when a target exist.",
-                    order = 3,
-                    hidden = true,
+                    order = 4,
                     min = 0.3,
                     max= 0.8,
                     step = 0.01,
@@ -509,13 +509,13 @@ sNamePlates.options = {
                 tarIndicatorTitle= {
                     type = "header",
                     name = "Target Indicator",
-                    order = 4,
+                    order = 10,
                 },
                 tarIndicatorToggle = {
                     type = "toggle",
                     name = "Enable",
                     desc = "Indicator when a target exist.",
-                    order = 5,
+                    order = 11,
                     set = function(info, val) 
                         sNamePlates.db.profile.tarIndicatorToggle = val 
                     end,
@@ -527,7 +527,7 @@ sNamePlates.options = {
                     type = "select",
                     name = "Indicator",
                     desc = "Defines the target indicator.",
-                    order = 6,
+                    order = 12,
                     values = {
                         [1] = "Double Arrow 1",
                         [2] = "Double Arrow 2",
@@ -554,7 +554,7 @@ sNamePlates.options = {
                     type = "toggle",
                     name = "Inverse",
                     desc = "Invert the target indicator.",
-                    order = 7,
+                    order = 13,
                     disabled = function() 
                         return not sNamePlates.db.profile.tarIndicatorToggle
                     end,
@@ -570,7 +570,7 @@ sNamePlates.options = {
                     type = "range",
                     name = "Width",
                     desc = "The width of the target indicator.",
-                    order = 8,
+                    order = 14,
                     min = 10,
                     max= 100,
                     step = 1,
@@ -589,7 +589,7 @@ sNamePlates.options = {
                     type = "range",
                     name = "Height",
                     desc = "The height of the target indicator.",
-                    order = 9,
+                    order = 15,
                     min = 10,
                     max= 100,
                     step = 1,
@@ -608,7 +608,7 @@ sNamePlates.options = {
                     type = "range",
                     name = "Separation",
                     desc = "Separation of the target indicators",
-                    order = 10,
+                    order = 16,
                     min = -200,
                     max= 200,
                     step = 1,
@@ -627,7 +627,7 @@ sNamePlates.options = {
                     type = "range",
                     name = "X Offset",
                     desc = "Position of the target indicator in the x-axis.",
-                    order = 11,
+                    order = 14,
                     min = -200,
                     max= 200,
                     step = 1,
@@ -646,7 +646,7 @@ sNamePlates.options = {
                     type = "range",
                     name = "Y Offset",
                     desc = "Position of the target indicator in the y-axis.",
-                    order = 12,
+                    order = 18,
                     min = -30,
                     max= 30,
                     step = 1,
@@ -947,7 +947,30 @@ sNamePlates.options = {
                     get = function(info) 
                         return sNamePlates.db.profile.RIYOffset
                     end,
-                },            
+                },          
+                RINameplateColoringTitle = {
+                    type = "header",
+                    name = "Nameplate Coloring",
+                    order = 20,
+                },
+                RINameplateColoringDesc= {
+                    type = "description",
+                    order = 21,
+                    name = _format("|cFF00fffb%s|r This option will make the Nameplate Colors set in General to be overwritten by the current raid icon present in the nameplate (if there's any). Doesn't apply to Tank Mode.", "Note:"),
+                    fontSize = "large",
+                },
+                RINameplateColoringToggle = {
+                    type = "toggle",
+                    name = "Enable",
+                    desc = "Color the nameplates depending if there's a raid icon.",
+                    order = 22,
+                    set = function(info, val) 
+                        sNamePlates.db.profile.RINameplateColoringToggle = val 
+                    end,
+                    get = function(info) 
+                        return sNamePlates.db.profile.RINameplateColoringToggle
+                    end,
+                },  
             },
         },   
         font = {
@@ -1613,8 +1636,11 @@ sNamePlates.defaults = {
         --Raid Icon
         RIwidth = 35,
         RIheight = 35,
+
         RIXOffset = 88,
         RIYOffset = 28,
+
+        RINameplateColoringToggle = true,
 
         --Font
         nameColor = {["r"] =  0.84, ["g"] = 0.75, ["b"] =0.65, ["a"] = 1},

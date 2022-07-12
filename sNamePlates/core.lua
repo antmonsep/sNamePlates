@@ -11,7 +11,7 @@ local backdrop = {
 local _format = string.format
 local math_max = math.max
 local math_floor = math.floor
-local unpack = unpack
+local _unpack = unpack
 local targetExist
 
 local cchProgress = 0
@@ -21,6 +21,27 @@ local iconFound, iconPath
 local name, _, _, texture, startTime, endTime, _, castID, notInterruptible, spellID 
 
 local FetchFont, FetchStatusbar, sNamePlates_OnUpdate
+
+-- used to update only if needed.
+local lastChildCount, newChildCount = 0, 0
+
+local RaidIconCoordinate = {
+	[0] = {[0] = "STAR", [0.25] = "MOON"},
+	[0.25] = {[0] = "CIRCLE", [0.25] = "SQUARE"},
+	[0.5] = {[0] = "DIAMOND", [0.25] = "CROSS"},
+	[0.75] = {[0] = "TRIANGLE", [0.25] = "SKULL"}
+}
+
+local RaidIconColors = {
+	STAR = {0.85, 0.81, 0.27, 1},
+	MOON = {0.60, 0.75, 0.85, 1},
+	CIRCLE = {0.93, 0.51, 0.06, 1},
+	SQUARE = {0, 0.64, 1, 1},
+	DIAMOND = {0.7, 0.06, 0.84, 1},
+	CROSS = {0.82, 0.18, 0.18, 1},
+	TRIANGLE = {0.14, 0.66, 0.14, 1},
+	SKULL = {0.89, 0.83, 0.74, 1}
+}
 
 local mode = CreateFrame("Frame")
 local function setTimer(duration, func)
@@ -141,13 +162,9 @@ function sNamePlates:ChatCommand(input)
 end
 
 local function sNamePlates_IsValidFrame(frame)
-	if frame:GetName() then
-		return
-	end
-
-	overlayRegion = select(2, frame:GetRegions())
-
-	return overlayRegion and overlayRegion:GetObjectType() == "Texture" and overlayRegion:GetTexture() == [[Interface\Tooltips\Nameplate-Border]]
+	if frame:GetName() then return end
+	local overlayRegion = select(2, frame:GetRegions())
+	return (overlayRegion and overlayRegion:GetObjectType() == "Texture" and overlayRegion:GetTexture() == [[Interface\Tooltips\Nameplate-Border]])
 end
 
 local function IconScaling(X, Y)
@@ -167,37 +184,32 @@ local function IconScaling(X, Y)
 	return X1, X2, Y1, Y2
 end
 
-local function sNamePlates_NameplateColoring(r, g, b, a)
-	if g + b == 0 then 
-		newr = sNamePlates.db.profile.hostileColor.r
-		newg = sNamePlates.db.profile.hostileColor.g
-		newb = sNamePlates.db.profile.hostileColor.b 
-		newa = sNamePlates.db.profile.hostileColor.a	
-	elseif r + b == 0 then
-		newr = sNamePlates.db.profile.pvpFlaggedColor.r
-		newg = sNamePlates.db.profile.pvpFlaggedColor.g
-		newb = sNamePlates.db.profile.pvpFlaggedColor.b 
-		newa = sNamePlates.db.profile.pvpFlaggedColor.a	
-	elseif r + g == 0 then
-		newr = sNamePlates.db.profile.nonpvpFlaggedColor.r
-		newg = sNamePlates.db.profile.nonpvpFlaggedColor.g
-		newb = sNamePlates.db.profile.nonpvpFlaggedColor.b 
-		newa = sNamePlates.db.profile.nonpvpFlaggedColor.a
-	elseif 2 - (r + g) < 0.2 and b == 0 then
-		newr = sNamePlates.db.profile.neutralColor.r
-		newg = sNamePlates.db.profile.neutralColor.g
-		newb = sNamePlates.db.profile.neutralColor.b 
-		newa = sNamePlates.db.profile.neutralColor.a
+local function sNamePlates_NameplateColoring(self)
+	if self.raidIcon:IsShown() == 1 and sNamePlates.db.profile.RINameplateColoringToggle then
+		local x, y = self.raidIcon:GetTexCoord()
+		self.raidIconDesc = RaidIconCoordinate[x][y]		
+		self.healthbar:SetStatusBarColor(_unpack(RaidIconColors[self.raidIconDesc]))
 	else
-		newr, newg, newb, newa = r, g, b, a
-	end
-	return newr, newg, newb, newa
+		if self.g + self.b == 0 then 
+			self.healthbar:SetStatusBarColor(sNamePlates.db.profile.hostileColor.r, sNamePlates.db.profile.hostileColor.g, sNamePlates.db.profile.hostileColor.b, sNamePlates.db.profile.hostileColor.a)
+		elseif self.r + self.b == 0 then
+			self.healthbar:SetStatusBarColor(sNamePlates.db.profile.pvpFlaggedColor.r, sNamePlates.db.profile.pvpFlaggedColor.g, sNamePlates.db.profile.pvpFlaggedColor.b, sNamePlates.db.profile.pvpFlaggedColor.a)
+		elseif self.r + self.g == 0 then
+			self.healthbar:SetStatusBarColor(sNamePlates.db.profile.nonpvpFlaggedColor.r, sNamePlates.db.profile.nonpvpFlaggedColor.g, sNamePlates.db.profile.nonpvpFlaggedColor.b, sNamePlates.db.profile.nonpvpFlaggedColor.a)
+		elseif (2 - (self.r + self.g) < 0.2 and self.b == 0) then
+			self.healthbar:SetStatusBarColor(sNamePlates.db.profile.neutralColor.r, sNamePlates.db.profile.neutralColor.g, sNamePlates.db.profile.neutralColor.b, sNamePlates.db.profile.neutralColor.a)
+		else
+			self.healthbar:SetStatusBarColor(self.r, self.g, self.b, self.a)
+		end
+	end	
 end	
 
 local function sNamePlates_NameplateBorderColoring(self, gr, gg, gb)
 	if sNamePlates.db.profile.NMToggle then
+		--self.healthbar:SetStatusBarColor(sNamePlates_NameplateColoring(self.r, self.g, self.b, self.a))
+		sNamePlates_NameplateColoring(self)
 		if sNamePlates.db.profile.NMToggleBorderToo then
-			if gr > 0.99 and gg == 0 and gb == 0 then 
+			if gr > 0.99 and gg == 0 and gb == 0 then
 				self.hpGlow:SetBackdropBorderColor(sNamePlates.db.profile.NMAttackingColor.r, sNamePlates.db.profile.NMAttackingColor.g, sNamePlates.db.profile.NMAttackingColor.b, sNamePlates.db.profile.NMAttackingColor.a)
 				self.cbGlow:SetBackdropBorderColor(sNamePlates.db.profile.NMAttackingColor.r, sNamePlates.db.profile.NMAttackingColor.g, sNamePlates.db.profile.NMAttackingColor.b, sNamePlates.db.profile.NMAttackingColor.a)
 				self.castbarIconGlow:SetBackdropBorderColor(sNamePlates.db.profile.NMAttackingColor.r, sNamePlates.db.profile.NMAttackingColor.g, sNamePlates.db.profile.NMAttackingColor.b, sNamePlates.db.profile.NMAttackingColor.a)
@@ -214,6 +226,7 @@ local function sNamePlates_NameplateBorderColoring(self, gr, gg, gb)
 	elseif sNamePlates.db.profile.TMToggle then 
 		if gr> 0.99 and gg== 0 and gb == 0 then 
 			self.healthbar:SetStatusBarColor(sNamePlates.db.profile.TMAttackingColor.r, sNamePlates.db.profile.TMAttackingColor.g, sNamePlates.db.profile.TMAttackingColor.b, sNamePlates.db.profile.TMAttackingColor.a)
+			
 			if sNamePlates.db.profile.TMToggleBorderToo then
 				self.hpGlow:SetBackdropBorderColor(sNamePlates.db.profile.TMAttackingColor.r, sNamePlates.db.profile.TMAttackingColor.g, sNamePlates.db.profile.TMAttackingColor.b, sNamePlates.db.profile.TMAttackingColor.a)
 				self.cbGlow:SetBackdropBorderColor(sNamePlates.db.profile.TMAttackingColor.r, sNamePlates.db.profile.TMAttackingColor.g, sNamePlates.db.profile.TMAttackingColor.b, sNamePlates.db.profile.TMAttackingColor.a)
@@ -229,26 +242,25 @@ local function sNamePlates_NameplateBorderColoring(self, gr, gg, gb)
 			end
 		end	
 	end	
-	self.oldglowr, self.oldglowg, self.oldglowb = gr, gg, gb
+	--self.oldglowr, self.oldglowg, self.oldglowb, self.borderHidden, self.borderColored = gr, gg, gb, true, true
 end	
 
-local function sNamePlates_CheckForBorderChange(self)
-	if self.oldglow:IsShown() then 
+local function sNamePlates_CheckForNameplateChange(self)
+	if self.oldglow:IsShown() == 1 then
 		local glowr, glowg, glowb = self.oldglow:GetVertexColor()
-		if not (glowr == self.oldglowr and glowg == self.oldglowg and glowb == self.oldglowb) then 
+		--print(glowr.." - "..self.oldglowr.." | "..glowg.." - "..self.oldglowg.." | "..glowb.." - "..self.oldglowb)
+		--if self.borderColored == false or (glowr ~= self.oldglowr and glowg ~= self.oldglowg and glowb ~= self.oldglowb) then 
 			sNamePlates_NameplateBorderColoring(self, glowr, glowg, glowb)
-			self.borderHidden = true
-		end
+		--end
 	else
-		if self.borderHidden then 
-			if sNamePlates.db.profile.TMToggle then 
-				self.healthbar:SetStatusBarColor(sNamePlates_NameplateColoring(self.r, self.g, self.b, self.a))
-			end	
+		--if self.borderHidden then 
+			sNamePlates_NameplateColoring(self)
+
 			self.hpGlow:SetBackdropBorderColor(sNamePlates.db.profile.healthbarBorderColor.r, sNamePlates.db.profile.healthbarBorderColor.g, sNamePlates.db.profile.healthbarBorderColor.b, sNamePlates.db.profile.healthbarBorderColor.a)
 			self.cbGlow:SetBackdropBorderColor(sNamePlates.db.profile.castbarBorderColor.r, sNamePlates.db.profile.castbarBorderColor.g, sNamePlates.db.profile.castbarBorderColor.b, sNamePlates.db.profile.castbarBorderColor.a)
 			self.castbarIconGlow:SetBackdropBorderColor(sNamePlates.db.profile.castbarIconBorderColor.r, sNamePlates.db.profile.castbarIconBorderColor.g, sNamePlates.db.profile.castbarIconBorderColor.b, sNamePlates.db.profile.castbarIconBorderColor.a)	
-			self.oldglowr, self.oldglowg, self.oldglowb, self.borderHidden = nil, nil, nil, nil
-		end
+			--self.oldglowr, self.oldglowg, self.oldglowb, self.borderHidden, self.borderColored  = 1, 1, 1, false, false
+		--end
 	end	
 end
 
@@ -256,7 +268,7 @@ local function sNamePlates_CheckForOptionsChange(self)
 	if sNamePlates.db.profile.optionChanged then
 		local changed = sNamePlates.db.profile.optionChanged
 		if changed == "nameplateColor" then
-			self.healthbar:SetStatusBarColor(sNamePlates_NameplateColoring(self.r, self.g, self.b, self.a))
+			sNamePlates_NameplateColoring(self)
 		elseif changed == "nameplateSize" then
 			self.healthbar:SetHeight(sNamePlates.db.profile.nameplateHeight)
 			self.healthbar:SetWidth(sNamePlates.db.profile.nameplateWidth)
@@ -470,7 +482,7 @@ do
 end
 
 local function sNamePlates_FrameOnUpdate(self, elapsed)
-	self.elapsed = self.elapsed + elapsed
+	self.elapsed = (self.elapsed or 0) + elapsed
 	if self.elapsed >= 0.025 then
 		--Health Format
 		self:FormatHealthText()	
@@ -480,8 +492,8 @@ local function sNamePlates_FrameOnUpdate(self, elapsed)
 			self:CheckForOptionsChange()
 		end
 
-		--NM - TM
-		self:CheckForBorderChange()
+		--Nameplate Change
+		self:CheckForNameplateChange()
 
 		--On target
 		if targetExist and self:GetAlpha() == 1 then	
@@ -496,29 +508,25 @@ local function sNamePlates_FrameOnUpdate(self, elapsed)
 		else
 		 	self.leftIndicator:Hide()
 			self.rightIndicator:Hide() 
-			--if targetExist then
-			--	if sNamePlates.db.profile.alphaToggle then
-			--	self:SetAlpha(sNamePlates.db.profile.alphaValue)      **disabled since the addon is not running frame by frame
-			--	end	
-			--end
+			if targetExist then
+				if sNamePlates.db.profile.alphaToggle then
+					self:SetAlpha(sNamePlates.db.profile.alphaValue)    
+				end	
+			end
 		end 
 		self.elapsed = 0
 	end
 end
 
-local function sNamePlates_UpdateFrame(self)
+local function sNamePlates_OnShow(self)
 	self.specialIcon:Hide()
-
-	--Nameplate Coloring
-	self.r, self.g, self.b, self.a = self.healthbar:GetStatusBarColor()
-	--print(self.r.." - "..self.g.." - "..self.b.." - "..self.a)
-	self.healthbar:SetStatusBarColor(sNamePlates_NameplateColoring(self.r, self.g, self.b, self.a))
 
  	self.leftIndicator:Hide()
 	self.rightIndicator:Hide()  
 
-	--NM - TM
-	self:CheckForBorderChange()
+	--Nameplate Change
+	self.r, self.g, self.b, self.a = self.healthbar:GetStatusBarColor()
+	self:CheckForNameplateChange()
 
  	--Healthbar
 	self.healthbar:SetStatusBarTexture(FetchStatusbar(sNamePlates.db.profile.nameplateTexture))
@@ -650,13 +658,11 @@ end
 
 local function sNamePlates_OnHide(self)
 	self.highlight:Hide()
-	self.oldglowr, self.oldglowg, self.oldglowb, self.borderHidden = nil, nil, nil, nil
+	--self.borderHidden, self.borderColored = true, false
 end
 
 local function sNamePlates_CreateFrame(frame)
-	if frame.done then
-		return
-	end
+	frame.done = true
 
 	local healthBar, castBar = frame:GetChildren()
 	local glowRegion, overlayRegion, shieldedRegion, castbarOverlay, spellIconRegion, highlightRegion, nameTextRegion, levelTextRegion, bossIconRegion, raidIconRegion, stateIconRegion = frame:GetRegions()
@@ -741,22 +747,19 @@ local function sNamePlates_CreateFrame(frame)
 	frame.hpGlow:SetPoint("BOTTOMRIGHT", frame.healthbar, "BOTTOMRIGHT", 5, -5)
 	frame.hpGlow:SetBackdrop(backdrop)
 	frame.hpGlow:SetBackdropColor(sNamePlates.db.profile.healthbarBorderColor.r, sNamePlates.db.profile.healthbarBorderColor.g, sNamePlates.db.profile.healthbarBorderColor.b, sNamePlates.db.profile.healthbarBorderColor.a)
-	frame.hpGlow:SetBackdropBorderColor(sNamePlates.db.profile.healthbarBorderColor.r, sNamePlates.db.profile.healthbarBorderColor.g, sNamePlates.db.profile.healthbarBorderColor.b, sNamePlates.db.profile.healthbarBorderColor.a)
 	
 	frame.cbGlow = CreateFrame("Frame", nil, frame.castbar)
 	frame.cbGlow:SetPoint("TOPLEFT", frame.castbar, "TOPLEFT", -5, 5)
 	frame.cbGlow:SetPoint("BOTTOMRIGHT", frame.castbar, "BOTTOMRIGHT", 5, -5)
 	frame.cbGlow:SetBackdrop(backdrop)
 	frame.cbGlow:SetBackdropColor(sNamePlates.db.profile.castbarBorderColor.r, sNamePlates.db.profile.castbarBorderColor.g, sNamePlates.db.profile.castbarBorderColor.b, sNamePlates.db.profile.castbarBorderColor.a)
-	frame.cbGlow:SetBackdropBorderColor(sNamePlates.db.profile.castbarBorderColor.r, sNamePlates.db.profile.castbarBorderColor.g, sNamePlates.db.profile.castbarBorderColor.b, sNamePlates.db.profile.castbarBorderColor.a)
-		
+	
 	frame.castbarIconGlow = CreateFrame("Frame", nil, frame.castbar)
 	frame.castbarIconGlow:SetPoint("TOPLEFT", frame.castbarIcon, "TOPLEFT", -5, 5)
 	frame.castbarIconGlow:SetPoint("BOTTOMRIGHT", frame.castbarIcon, "BOTTOMRIGHT", 5, -5)
     frame.castbarIconGlow:SetBackdrop(backdrop)
     frame.castbarIconGlow:SetBackdropColor(sNamePlates.db.profile.castbarIconBorderColor.r, sNamePlates.db.profile.castbarIconBorderColor.g, sNamePlates.db.profile.castbarIconBorderColor.b, sNamePlates.db.profile.castbarIconBorderColor.a)
-	frame.castbarIconGlow:SetBackdropBorderColor(sNamePlates.db.profile.castbarIconBorderColor.r, sNamePlates.db.profile.castbarIconBorderColor.g, sNamePlates.db.profile.castbarIconBorderColor.b, sNamePlates.db.profile.castbarIconBorderColor.a)
-
+	
  	local hp = CreateFrame("Frame", nil, frame.healthbar)
     hp:SetHeight(1)
     hp:SetFrameLevel(frame.healthbar:GetFrameLevel() + 1)
@@ -795,7 +798,9 @@ local function sNamePlates_CreateFrame(frame)
 
 	frame.FormatHealthText = sNamePlates_FormatHealthText
 	frame.CheckForOptionsChange = sNamePlates_CheckForOptionsChange
-	frame.CheckForBorderChange = sNamePlates_CheckForBorderChange
+	--For some reason that I can't figure out nameplates are losing color on units dying (warmane) so the coloring will have to be done every time the
+	--addon updates :/
+	frame.CheckForNameplateChange = sNamePlates_CheckForNameplateChange
 
 	hp:SetWidth(hp.text:GetWidth())
     percent:SetWidth(percent.text:GetWidth())
@@ -831,25 +836,29 @@ local function sNamePlates_CreateFrame(frame)
 	frame.boss = bossIconRegion
 	frame.raidIcon = raidIconRegion
 
-	frame.done = true
+	--frame.oldglowr, frame.oldglowg, frame.oldglowb = 1, 1, 1
+	--frame.borderHidden = true
 
-	sNamePlates_UpdateFrame(frame)
+	sNamePlates_OnShow(frame)
 
-	frame.elapsed = 0
-
-	frame:SetScript("OnShow", sNamePlates_UpdateFrame)
+	frame:SetScript("OnShow", sNamePlates_OnShow)
 	frame:SetScript("OnHide", sNamePlates_OnHide)
 	frame:SetScript("OnUpdate", sNamePlates_FrameOnUpdate)
 end
 
 function sNamePlates_OnUpdate(self, elapsed)
     lastUpdate = lastUpdate + elapsed
+
 	if lastUpdate > 0.025 then
         lastUpdate = 0
-		for i = 1, select("#", WorldFrame:GetChildren()) do
-			frame = select(i, WorldFrame:GetChildren())
-			if sNamePlates_IsValidFrame(frame) then
-				sNamePlates_CreateFrame(frame)
+		newChildCount = WorldFrame:GetNumChildren()
+		if lastChildCount ~= newChildCount then
+			lastChildCount = newChildCount
+			for i = 1, select("#", WorldFrame:GetChildren()) do
+				local frame = select(i, WorldFrame:GetChildren())
+				if sNamePlates_IsValidFrame(frame) and not frame.done then
+					sNamePlates_CreateFrame(frame)
+				end
 			end
 		end	
     end  
