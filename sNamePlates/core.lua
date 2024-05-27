@@ -492,6 +492,12 @@ local function sNamePlates_FrameOnUpdate(self, elapsed)
 			self:CheckForOptionsChange()
 		end
 
+		--Castbar
+		if self.castbar:IsShown() then
+			self.castbar:ClearAllPoints()
+			self.castbar:SetPoint("BOTTOM", self.healthbar, "CENTER", 0, -20)
+		end
+
 		--Nameplate Change
 		self:CheckForNameplateChange()
 
@@ -543,6 +549,13 @@ local function sNamePlates_OnShow(self)
 	self.castbar:SetStatusBarTexture(FetchStatusbar(sNamePlates.db.profile.nameplateTexture))
 	self.castbar:SetHeight(sNamePlates.db.profile.castbarHeight)
 	self.castbar:SetWidth(sNamePlates.db.profile.nameplateWidth)
+
+	self.castbar:SetScript("OnShow", function() 
+		if self.healthbar then
+			self.castbar:ClearAllPoints()
+			self.castbar:SetPoint("BOTTOM", self.healthbar, "CENTER", 0, -20)
+		end
+	end)
 
 	--Healthbar Name
 	self.name:SetFont(FetchFont(sNamePlates.db.profile.nameFont), sNamePlates.db.profile.nameFontSize, sNamePlates.db.profile.nameOutline)
@@ -667,21 +680,17 @@ local function sNamePlates_CreateFrame(frame)
 	local healthBar, castBar = frame:GetChildren()
 	local glowRegion, overlayRegion, shieldedRegion, castbarOverlay, spellIconRegion, highlightRegion, nameTextRegion, levelTextRegion, bossIconRegion, raidIconRegion, stateIconRegion = frame:GetRegions()
 
+	glowRegion:SetTexture(nil)
+	overlayRegion:SetTexture(nil)
+	castbarOverlay:SetTexture(nil)
+	stateIconRegion:SetTexture(nil)
+	bossIconRegion:SetTexture(nil)
+	shieldedRegion:SetTexture(nil)
+
 	frame.oldname = nameTextRegion
 	frame.oldname:Hide()
 
 	spellIconRegion:Hide()
-	
-	local newNameRegion = frame:CreateFontString()
-	newNameRegion:SetJustifyH("LEFT")
-	newNameRegion:SetPoint("BOTTOM", healthBar, "TOP", 0, 2)
-	if sNamePlates.db.profile.shNameSelect  then
-		newNameRegion:SetShadowOffset(1.25, -1.25)
-	else
-		newNameRegion:SetShadowOffset(0, 0)
-	end
-
-	frame.name = newNameRegion
 
 	frame.level = levelTextRegion
 	frame.level:SetFont(FetchFont(sNamePlates.db.profile.levelFont), sNamePlates.db.profile.levelFontSize, sNamePlates.db.profile.levelOutline)
@@ -693,13 +702,6 @@ local function sNamePlates_CreateFrame(frame)
 	frame.level:SetJustifyH("RIGHT")
     frame.level:SetJustifyV("BOTTOM")
 
-	glowRegion:SetTexture(nil)
-	overlayRegion:SetTexture(nil)
-	castbarOverlay:SetTexture(nil)
-	stateIconRegion:SetTexture(nil)
-	bossIconRegion:SetTexture(nil)
-	shieldedRegion:SetTexture(nil)
-
 	frame.highlight = highlightRegion
 	frame.highlight:SetTexture(FetchStatusbar(sNamePlates.db.profile.highlightTexture))
 	frame.highlight:SetVertexColor(sNamePlates.db.profile.highlightColor.r, sNamePlates.db.profile.highlightColor.g, sNamePlates.db.profile.highlightColor.b, sNamePlates.db.profile.highlightColor.a)
@@ -709,56 +711,27 @@ local function sNamePlates_CreateFrame(frame)
 	frame.healthbar:ClearAllPoints()
 	frame.healthbar:SetPoint("CENTER", healthBar:GetParent(), sNamePlates.db.profile.nameplateXOffset, sNamePlates.db.profile.nameplateYOffset)
 
-	raidIconRegion:ClearAllPoints()
-	raidIconRegion:SetHeight(sNamePlates.db.profile.RIheight)
-	raidIconRegion:SetWidth(sNamePlates.db.profile.RIwidth)
-	raidIconRegion:SetPoint("CENTER", frame.healthbar, "CENTER", sNamePlates.db.profile.RIXOffset, sNamePlates.db.profile.RIYOffset)
+	local newNameRegion = frame:CreateFontString()
+	newNameRegion:SetJustifyH("LEFT")
+	newNameRegion:SetPoint("BOTTOM", frame.healthbar, "TOP", 0, 2)
+	if sNamePlates.db.profile.shNameSelect  then
+		newNameRegion:SetShadowOffset(1.25, -1.25)
+	else
+		newNameRegion:SetShadowOffset(0, 0)
+	end
 
-	castBar:SetScript("OnShow", function() 
-		castBar:SetStatusBarTexture(FetchStatusbar(sNamePlates.db.profile.nameplateTexture))
-		castBar:SetHeight(sNamePlates.db.profile.castbarHeight)
-		castBar:SetWidth(sNamePlates.db.profile.nameplateWidth)
-		castBar:SetPoint("BOTTOM", frame.healthbar, "CENTER", -2, -20)
-	end)
+	frame.name = newNameRegion
 
-	frame.castbar = castBar
-
- 	frame.castbarIcon = CreateFrame("Frame", nil, frame.castbar)
-	frame.castbarIcon:SetHeight(35)
-	frame.castbarIcon:SetWidth(35)
-	frame.castbarIcon:SetPoint("BOTTOMLEFT", frame.castbar, "RIGHT", sNamePlates.db.profile.nameplateHeight/2, -sNamePlates.db.profile.nameplateHeight/2) 
-
-	frame.castbarIcon.Texture = spellIconRegion
-	frame.castbarIcon.Texture:SetAllPoints(frame.castbarIcon)
-	frame.castbarIcon.Texture:SetTexCoord(IconScaling(frame.castbarIcon:GetWidth(),frame.castbarIcon:GetHeight()))
-
-	frame.hpBackground = healthBar:CreateTexture(nil, "BORDER")
-	frame.hpBackground:SetAllPoints(healthBar)
+	frame.hpBackground = frame.healthbar:CreateTexture(nil, "BORDER")
+	frame.hpBackground:SetAllPoints(frame.healthbar)
 	frame.hpBackground:SetTexture(FetchStatusbar(sNamePlates.db.profile.backgroundTexture))
 	frame.hpBackground:SetVertexColor(sNamePlates.db.profile.backgroundNameplateColor.r, sNamePlates.db.profile.backgroundNameplateColor.g, sNamePlates.db.profile.backgroundNameplateColor.b, sNamePlates.db.profile.backgroundNameplateColor.a)
-
-	frame.cbBackground = frame.castbar:CreateTexture(nil, "BORDER")
-	frame.cbBackground:SetAllPoints(frame.castbar)
-	frame.cbBackground:SetTexture(FetchStatusbar(sNamePlates.db.profile.castbarBackgroundTexture))
-	frame.cbBackground:SetVertexColor(sNamePlates.db.profile.backgroundCastbarColor.r, sNamePlates.db.profile.backgroundCastbarColor.g, sNamePlates.db.profile.backgroundCastbarColor.b, sNamePlates.db.profile.backgroundCastbarColor.a)
 
 	frame.hpGlow = CreateFrame("Frame", nil, frame.healthbar)
 	frame.hpGlow:SetPoint("TOPLEFT", frame.healthbar, "TOPLEFT", -5, 5)
 	frame.hpGlow:SetPoint("BOTTOMRIGHT", frame.healthbar, "BOTTOMRIGHT", 5, -5)
 	frame.hpGlow:SetBackdrop(backdrop)
 	frame.hpGlow:SetBackdropColor(sNamePlates.db.profile.healthbarBorderColor.r, sNamePlates.db.profile.healthbarBorderColor.g, sNamePlates.db.profile.healthbarBorderColor.b, sNamePlates.db.profile.healthbarBorderColor.a)
-	
-	frame.cbGlow = CreateFrame("Frame", nil, frame.castbar)
-	frame.cbGlow:SetPoint("TOPLEFT", frame.castbar, "TOPLEFT", -5, 5)
-	frame.cbGlow:SetPoint("BOTTOMRIGHT", frame.castbar, "BOTTOMRIGHT", 5, -5)
-	frame.cbGlow:SetBackdrop(backdrop)
-	frame.cbGlow:SetBackdropColor(sNamePlates.db.profile.castbarBorderColor.r, sNamePlates.db.profile.castbarBorderColor.g, sNamePlates.db.profile.castbarBorderColor.b, sNamePlates.db.profile.castbarBorderColor.a)
-	
-	frame.castbarIconGlow = CreateFrame("Frame", nil, frame.castbar)
-	frame.castbarIconGlow:SetPoint("TOPLEFT", frame.castbarIcon, "TOPLEFT", -5, 5)
-	frame.castbarIconGlow:SetPoint("BOTTOMRIGHT", frame.castbarIcon, "BOTTOMRIGHT", 5, -5)
-    frame.castbarIconGlow:SetBackdrop(backdrop)
-    frame.castbarIconGlow:SetBackdropColor(sNamePlates.db.profile.castbarIconBorderColor.r, sNamePlates.db.profile.castbarIconBorderColor.g, sNamePlates.db.profile.castbarIconBorderColor.b, sNamePlates.db.profile.castbarIconBorderColor.a)
 	
  	local hp = CreateFrame("Frame", nil, frame.healthbar)
     hp:SetHeight(1)
@@ -796,14 +769,44 @@ local function sNamePlates_CreateFrame(frame)
     percent.text:Hide()
     frame.hpPercent = percent.text
 
-	frame.FormatHealthText = sNamePlates_FormatHealthText
-	frame.CheckForOptionsChange = sNamePlates_CheckForOptionsChange
-	--For some reason that I can't figure out nameplates are losing color on units dying (warmane) so the coloring will have to be done every time the
-	--addon updates :/
-	frame.CheckForNameplateChange = sNamePlates_CheckForNameplateChange
-
 	hp:SetWidth(hp.text:GetWidth())
     percent:SetWidth(percent.text:GetWidth())
+
+	raidIconRegion:ClearAllPoints()
+	raidIconRegion:SetHeight(sNamePlates.db.profile.RIheight)
+	raidIconRegion:SetWidth(sNamePlates.db.profile.RIwidth)
+	raidIconRegion:SetPoint("CENTER", frame.healthbar, "CENTER", sNamePlates.db.profile.RIXOffset, sNamePlates.db.profile.RIYOffset)
+	
+	frame.castbar = castBar
+	frame.castbar:SetStatusBarTexture(FetchStatusbar(sNamePlates.db.profile.nameplateTexture))
+	frame.castbar:SetHeight(sNamePlates.db.profile.castbarHeight)
+	frame.castbar:SetWidth(sNamePlates.db.profile.nameplateWidth)
+	
+	frame.castbarIcon = CreateFrame("Frame", nil, frame.castbar)
+	frame.castbarIcon:SetHeight(35)
+	frame.castbarIcon:SetWidth(35)
+	frame.castbarIcon:SetPoint("BOTTOMLEFT", frame.castbar, "RIGHT", sNamePlates.db.profile.nameplateHeight/2, -sNamePlates.db.profile.nameplateHeight/2) 
+
+	frame.castbarIcon.Texture = spellIconRegion
+	frame.castbarIcon.Texture:SetAllPoints(frame.castbarIcon)
+	frame.castbarIcon.Texture:SetTexCoord(IconScaling(frame.castbarIcon:GetWidth(),frame.castbarIcon:GetHeight()))
+
+	frame.cbBackground = frame.castbar:CreateTexture(nil, "BORDER")
+	frame.cbBackground:SetAllPoints(frame.castbar)
+	frame.cbBackground:SetTexture(FetchStatusbar(sNamePlates.db.profile.castbarBackgroundTexture))
+	frame.cbBackground:SetVertexColor(sNamePlates.db.profile.backgroundCastbarColor.r, sNamePlates.db.profile.backgroundCastbarColor.g, sNamePlates.db.profile.backgroundCastbarColor.b, sNamePlates.db.profile.backgroundCastbarColor.a)	
+
+	frame.castbarIconGlow = CreateFrame("Frame", nil, frame.castbar)
+	frame.castbarIconGlow:SetPoint("TOPLEFT", frame.castbarIcon, "TOPLEFT", -5, 5)
+	frame.castbarIconGlow:SetPoint("BOTTOMRIGHT", frame.castbarIcon, "BOTTOMRIGHT", 5, -5)
+	frame.castbarIconGlow:SetBackdrop(backdrop)
+	frame.castbarIconGlow:SetBackdropColor(sNamePlates.db.profile.castbarIconBorderColor.r, sNamePlates.db.profile.castbarIconBorderColor.g, sNamePlates.db.profile.castbarIconBorderColor.b, sNamePlates.db.profile.castbarIconBorderColor.a)
+
+	frame.cbGlow = CreateFrame("Frame", nil, frame.castbar)
+	frame.cbGlow:SetPoint("TOPLEFT", frame.castbar, "TOPLEFT", -5, 5)
+	frame.cbGlow:SetPoint("BOTTOMRIGHT", frame.castbar, "BOTTOMRIGHT", 5, -5)
+	frame.cbGlow:SetBackdrop(backdrop)
+	frame.cbGlow:SetBackdropColor(sNamePlates.db.profile.castbarBorderColor.r, sNamePlates.db.profile.castbarBorderColor.g, sNamePlates.db.profile.castbarBorderColor.b, sNamePlates.db.profile.castbarBorderColor.a)	
 
 	local right = frame:CreateTexture(nil, "BACKGROUND")
 	right:SetWidth(20)
@@ -838,6 +841,12 @@ local function sNamePlates_CreateFrame(frame)
 
 	--frame.oldglowr, frame.oldglowg, frame.oldglowb = 1, 1, 1
 	--frame.borderHidden = true
+
+	frame.FormatHealthText = sNamePlates_FormatHealthText
+	frame.CheckForOptionsChange = sNamePlates_CheckForOptionsChange
+	--For some reason that I can't figure out nameplates are losing color on units dying (warmane) so the coloring will have to be done every time the
+	--addon updates :/
+	frame.CheckForNameplateChange = sNamePlates_CheckForNameplateChange
 
 	sNamePlates_OnShow(frame)
 
