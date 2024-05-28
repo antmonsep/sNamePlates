@@ -865,7 +865,61 @@ sNamePlates.options = {
                         sNamePlates:RCBBackgroundColors()
                         sNamePlates.db.profile.optionChanged = "castbarBackgroundColor"
                     end, 
-                },   
+                },
+                castbarIconSettingsTitle = {
+                    type = "header",
+                    name = "Icon",
+                    order = 40,
+                },
+                castbarIconwidth = {
+                    type = "range",
+                    name = "Width",
+                    desc = "The width of the castbar icon.",
+                    order = 41,
+                    min = 1,
+                    max= 500,
+                    step = 1,
+                    set = function(info,val) 
+                        sNamePlates.db.profile.castbarIconwidth  = val 
+                        sNamePlates.db.profile.optionChanged = "castbarIconSize"
+                    end,
+                    get = function(info) 
+                        return sNamePlates.db.profile.castbarIconwidth 
+                    end,
+                },
+                castbarIconheight = {
+                    type = "range",
+                    name = "Height",
+                    desc = "The height of the castbar icon.",
+                    order = 42,
+                    min = 1,
+                    max= 500,
+                    step = 1,
+                    set = function(info,val) 
+                        sNamePlates.db.profile.castbarIconheight = val 
+                        sNamePlates.db.profile.optionChanged = "castbarIconSize"
+                    end,
+                    get = function(info) 
+                        return sNamePlates.db.profile.castbarIconheight 
+                    end,
+                },
+                castbarIconPositionOf  = {
+                    type = "select",
+                    name = "Position",
+                    desc = "Position of the castbar icon.",
+                    order = 43,
+                    values = {
+                        ["LEFT"] = "LEFT",
+                        ["RIGHT"] = "RIGHT",
+                    },
+                    set = function(info, val) 
+                        sNamePlates.db.profile.castbarIconPositionOf = val 
+                        sNamePlates.db.profile.optionChanged = "castbarIconSize"
+                    end,
+                    get = function(info) 
+                        return sNamePlates.db.profile.castbarIconPositionOf
+                    end,
+                }, 
             },
         },   
         raidIcon = {
@@ -1626,6 +1680,11 @@ sNamePlates.defaults = {
         castbarTexture = "Armory",
         castbarBackgroundTexture = "Armory",
         backgroundCastbarColor = {["r"] = 0.25, ["g"] = 0.25, ["b"] = 0.25, ["a"] = 0},
+
+        castbarIconwidth = 35,
+        castbarIconheight = 35,
+
+        castbarIconPositionOf = "RIGHT",
 
         castNameXOffset = -2,
         castNameYOffset = -12, 

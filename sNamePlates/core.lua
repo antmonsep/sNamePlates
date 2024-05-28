@@ -423,6 +423,16 @@ local function sNamePlates_CheckForOptionsChange(self)
 				self.level:Hide()
 				self.name:Hide()
 			end
+		elseif changed == "castbarIconSize" then
+			self.castbarIcon:SetHeight(sNamePlates.db.profile.castbarIconheight)
+			self.castbarIcon:SetWidth(sNamePlates.db.profile.castbarIconwidth)
+			self.castbarIcon.Texture:SetTexCoord(IconScaling(self.castbarIcon:GetWidth(), self.castbarIcon:GetHeight()))
+			
+			if sNamePlates.db.profile.castbarIconPositionOf == "RIGHT" then
+				self.castbarIcon:SetPoint("BOTTOMLEFT", self.castbar, sNamePlates.db.profile.castbarIconPositionOf , sNamePlates.db.profile.nameplateHeight/2, -sNamePlates.db.profile.nameplateHeight/2) 
+			else
+				self.castbarIcon:SetPoint("BOTTOMRIGHT", self.castbar, sNamePlates.db.profile.castbarIconPositionOf, -sNamePlates.db.profile.nameplateHeight/2, -sNamePlates.db.profile.nameplateHeight/2) 
+			end
 		end 
 	end
 end
@@ -556,6 +566,9 @@ local function sNamePlates_OnShow(self)
 			self.castbar:SetPoint("BOTTOM", self.healthbar, "CENTER", 0, -20)
 		end
 	end)
+
+	self.castbarIcon:SetHeight(sNamePlates.db.profile.castbarIconheight)
+	self.castbarIcon:SetWidth(sNamePlates.db.profile.castbarIconwidth)
 
 	--Healthbar Name
 	self.name:SetFont(FetchFont(sNamePlates.db.profile.nameFont), sNamePlates.db.profile.nameFontSize, sNamePlates.db.profile.nameOutline)
@@ -719,7 +732,6 @@ local function sNamePlates_CreateFrame(frame)
 	else
 		newNameRegion:SetShadowOffset(0, 0)
 	end
-
 	frame.name = newNameRegion
 
 	frame.hpBackground = frame.healthbar:CreateTexture(nil, "BORDER")
@@ -728,6 +740,7 @@ local function sNamePlates_CreateFrame(frame)
 	frame.hpBackground:SetVertexColor(sNamePlates.db.profile.backgroundNameplateColor.r, sNamePlates.db.profile.backgroundNameplateColor.g, sNamePlates.db.profile.backgroundNameplateColor.b, sNamePlates.db.profile.backgroundNameplateColor.a)
 
 	frame.hpGlow = CreateFrame("Frame", nil, frame.healthbar)
+	frame.hpGlow:SetFrameLevel(frame.healthbar:GetFrameLevel() - 1)
 	frame.hpGlow:SetPoint("TOPLEFT", frame.healthbar, "TOPLEFT", -5, 5)
 	frame.hpGlow:SetPoint("BOTTOMRIGHT", frame.healthbar, "BOTTOMRIGHT", 5, -5)
 	frame.hpGlow:SetBackdrop(backdrop)
@@ -783,9 +796,14 @@ local function sNamePlates_CreateFrame(frame)
 	frame.castbar:SetWidth(sNamePlates.db.profile.nameplateWidth)
 	
 	frame.castbarIcon = CreateFrame("Frame", nil, frame.castbar)
-	frame.castbarIcon:SetHeight(35)
-	frame.castbarIcon:SetWidth(35)
-	frame.castbarIcon:SetPoint("BOTTOMLEFT", frame.castbar, "RIGHT", sNamePlates.db.profile.nameplateHeight/2, -sNamePlates.db.profile.nameplateHeight/2) 
+	frame.castbarIcon:SetHeight(sNamePlates.db.profile.castbarIconheight)
+	frame.castbarIcon:SetWidth(sNamePlates.db.profile.castbarIconwidth)
+
+	if sNamePlates.db.profile.castbarIconPositionOf == "RIGHT" then
+		frame.castbarIcon:SetPoint("BOTTOMLEFT", frame.castbar, sNamePlates.db.profile.castbarIconPositionOf , sNamePlates.db.profile.nameplateHeight/2, -sNamePlates.db.profile.nameplateHeight/2) 
+	else
+		frame.castbarIcon:SetPoint("BOTTOMRIGHT", frame.castbar, sNamePlates.db.profile.castbarIconPositionOf, -sNamePlates.db.profile.nameplateHeight/2, -sNamePlates.db.profile.nameplateHeight/2) 
+	end
 
 	frame.castbarIcon.Texture = spellIconRegion
 	frame.castbarIcon.Texture:SetAllPoints(frame.castbarIcon)
