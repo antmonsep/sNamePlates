@@ -740,7 +740,7 @@ local function sNamePlates_CreateFrame(frame)
 	frame.hpBackground:SetVertexColor(sNamePlates.db.profile.backgroundNameplateColor.r, sNamePlates.db.profile.backgroundNameplateColor.g, sNamePlates.db.profile.backgroundNameplateColor.b, sNamePlates.db.profile.backgroundNameplateColor.a)
 
 	frame.hpGlow = CreateFrame("Frame", nil, frame.healthbar)
-	frame.hpGlow:SetFrameLevel(frame.healthbar:GetFrameLevel() - 1)
+	--frame.hpGlow:SetFrameLevel(frame.healthbar:GetFrameLevel() - 1)
 	frame.hpGlow:SetPoint("TOPLEFT", frame.healthbar, "TOPLEFT", -5, 5)
 	frame.hpGlow:SetPoint("BOTTOMRIGHT", frame.healthbar, "BOTTOMRIGHT", 5, -5)
 	frame.hpGlow:SetBackdrop(backdrop)
