@@ -512,6 +512,20 @@ do
     end
 end
 
+local function EnsureCastbarPosition(self)
+    local point, relativeTo, relativePoint, xOfs, yOfs = self.castbar:GetPoint()
+
+    if point ~= "BOTTOM"
+    or relativeTo ~= self.healthbar
+    or relativePoint ~= "CENTER"
+    or xOfs ~= 0
+    or yOfs ~= -20 then
+
+        self.castbar:ClearAllPoints()
+        self.castbar:SetPoint("BOTTOM", self.healthbar, "CENTER", 0, -20)
+    end
+end
+
 local function sNamePlates_FrameOnUpdate(self, elapsed)
 	self.elapsed = (self.elapsed or 0) + elapsed
 	if self.elapsed >= 0.025 then
@@ -519,14 +533,13 @@ local function sNamePlates_FrameOnUpdate(self, elapsed)
 		self:FormatHealthText()	
 
 		--Options Update
-		if ACD.OpenFrames["sNamePlates"] then
+		if ACD.OpenFrames["sNamePlates"] or sNamePlates.db.profile.optionChanged then
 			self:CheckForOptionsChange()
 		end
 
 		--Castbar
 		if self.castbar:IsShown() then
-			self.castbar:ClearAllPoints()
-			self.castbar:SetPoint("BOTTOM", self.healthbar, "CENTER", 0, -20)
+			EnsureCastbarPosition(self)
 		end
 
 		--Nameplate Change
@@ -582,10 +595,7 @@ local function sNamePlates_OnShow(self)
 	self.castbar:SetWidth(sNamePlates.db.profile.nameplateWidth)
 
 	self.castbar:SetScript("OnShow", function() 
-		if self.healthbar then
-			self.castbar:ClearAllPoints()
-			self.castbar:SetPoint("BOTTOM", self.healthbar, "CENTER", 0, -20)
-		end
+		EnsureCastbarPosition(self)
 	end)
 
 	self.castbarIcon:SetHeight(sNamePlates.db.profile.castbarIconheight)

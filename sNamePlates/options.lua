@@ -208,11 +208,16 @@ sNamePlates.options = {
                     name = "Highlight",
                     order = 40
                 },
+                --highlightTitleDesc= {
+                --    type = "description",
+                --    order = 41,
+                --    name = "If you don't see it happen, do /reload."
+                --},
                 highlightTexture = {
                     type = "select",
                     name = "Highlight Texture",
                     desc = "The texture used by the nameplate's highlight.",
-                    order = 41,
+                    order = 42,
                     width = 'normal',
                     dialogControl = "LSM30_Statusbar",
                     values = AceGUIWidgetLSMlists.statusbar,
@@ -227,7 +232,7 @@ sNamePlates.options = {
                 highlightColor = {
                     type = "color",
                     name = "Highlight Color",
-                    order = 42,
+                    order = 43,
                     hasAlpha = true,
                     set = function(info, r, g, b, a)
                         sNamePlates.db.profile.highlightColor = {["r"] = r, ["g"] = g, ["b"] = b, ["a"] = a}
@@ -242,7 +247,7 @@ sNamePlates.options = {
                     type = "execute",
                     name = "Reset",
                     desc = "Reset the highlight color.",
-                    order = 43,
+                    order = 44,
                     confirm = function()
                         sNamePlates:RHighlightColors()
                         sNamePlates.db.profile.optionChanged = "highlightColor"
