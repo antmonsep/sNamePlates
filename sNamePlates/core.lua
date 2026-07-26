@@ -912,8 +912,9 @@ function sNamePlates_OnUpdate(self, elapsed)
 		newChildCount = WorldFrame:GetNumChildren()
 		if lastChildCount ~= newChildCount then
 			lastChildCount = newChildCount
-			for i = 1, select("#", WorldFrame:GetChildren()) do
-				local frame = select(i, WorldFrame:GetChildren())
+			local children = {WorldFrame:GetChildren()}
+			for i = 1, #children do
+				local frame = children[i]
 				if sNamePlates_IsValidFrame(frame) and not frame.done then
 					sNamePlates_CreateFrame(frame)
 				end
