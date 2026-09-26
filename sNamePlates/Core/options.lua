@@ -1641,11 +1641,11 @@ sNamePlates.defaults = {
         nameplateWidth = 147,
         nameplateHeight = 14,
 
-        nameplateTexture = "Armory",
+        nameplateTexture = "Flatt",
         healthbarBorderColor = {["r"] = 0, ["g"] = 0, ["b"] = 0, ["a"] = 1},
-        highlightTexture = "Armory",
-        highlightColor = {["r"] = 0.25, ["g"] = 0.25, ["b"] = 0.25, ["a"] = 1},
-        backgroundTexture = "Armory",
+        highlightTexture = "Outline",
+        highlightColor = {["r"] = 0, ["g"] = 1, ["b"] = 0, ["a"] = 1},
+        backgroundTexture = "Flatt",
         backgroundNameplateColor = {["r"] = 0.25, ["g"] = 0.25, ["b"] = 0.25, ["a"] = 0},
 
         nameplateXOffset = 0,
@@ -1654,7 +1654,7 @@ sNamePlates.defaults = {
         NMToggle = true,
         NMAttackingColor = {["r"] = 0.99, ["g"] = 0, ["b"] = 0, ["a"] = 1},
         NMAboutAttackingColor = {["r"] = 0.99, ["g"] = 0.99, ["b"] = 0.47, ["a"] = 1},
-        NMToggleBorderToo = false,
+        NMToggleBorderToo = true,
 
         TMToggle = false,
         TMAttackingColor = {["r"] = 0.29, ["g"] = 0.69, ["b"] = 0.30, ["a"] = 1},
@@ -1688,8 +1688,8 @@ sNamePlates.defaults = {
         castbarBorderColor = {["r"] = 0, ["g"] = 0, ["b"] = 0, ["a"] = 1},
         castbarIconBorderColor = {["r"] = 0, ["g"] = 0, ["b"] = 0, ["a"] = 1},
 
-        castbarTexture = "Armory",
-        castbarBackgroundTexture = "Armory",
+        castbarTexture = "Flatt",
+        castbarBackgroundTexture = "Flatt",
         backgroundCastbarColor = {["r"] = 0.25, ["g"] = 0.25, ["b"] = 0.25, ["a"] = 0},
 
         castbarIconwidth = 35,

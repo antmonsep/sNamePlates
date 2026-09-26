@@ -8,5 +8,6 @@
 ## X-Embeds: Ace3
 
 embeds.xml
-core.lua
-options.lua
+Media\Media.lua
+Core\core.lua
+Core\options.lua
