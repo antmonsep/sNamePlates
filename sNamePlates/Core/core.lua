@@ -643,7 +643,7 @@ local function sNamePlates_CreateFrame(frame)
 	local healthBar, castBar = frame:GetChildren()
 	local glowRegion, overlayRegion, shieldedRegion, castbarOverlay, spellIconRegion, highlightRegion, nameTextRegion, levelTextRegion, bossIconRegion, raidIconRegion, stateIconRegion = frame:GetRegions()
 
-	glowRegion:SetTexture(nil)
+	glowRegion:SetAlpha(0)
 	overlayRegion:SetTexture(nil)
 	castbarOverlay:SetTexture(nil)
 	stateIconRegion:SetTexture(nil)
