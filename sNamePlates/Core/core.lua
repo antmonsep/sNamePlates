@@ -888,7 +888,7 @@ function sNamePlates:RTextColors()
 end
 
 function sNamePlates:RHighlightColors()
-	sNamePlates.db.profile.highlightColor = {["r"] = 0.25, ["g"] = 0.25, ["b"] = 0.25, ["a"] = 1}
+	sNamePlates.db.profile.highlightColor = {["r"] = 0, ["g"] = 1, ["b"] = 0, ["a"] = 1}
 end
 
 function sNamePlates:RNPBackgroundColors()
